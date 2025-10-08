@@ -1,0 +1,52 @@
+[
+  {
+    "id": "1",
+    "nombre": "Administrador",
+    "descripcion": "Acceso completo a todas las secciones y todas las reservas de todas las organizaciones",
+    "nivel": 3,
+    "permisos": [
+      "ver_dashboard",
+      "ver_todas_reservas",
+      "crear_reservas",
+      "editar_reservas",
+      "cancelar_reservas",
+      "crear_usuarios",
+      "editar_usuarios",
+      "eliminar_usuarios",
+      "gestionar_espacios",
+      "gestionar_organizaciones",
+      "ver_reportes",
+      "configurar_sistema"
+    ],
+    "createdAt": "2024-01-01T08:00:00.000Z",
+    "updatedAt": "2025-01-09T00:00:00.000Z"
+  },
+  {
+    "id": "2",
+    "nombre": "Usuario",
+    "descripcion": "Acceso solo a Dashboard y Mis Reservas de su propia organización",
+    "nivel": 2,
+    "permisos": [
+      "ver_dashboard",
+      "ver_mis_reservas",
+      "crear_reservas",
+      "editar_mis_reservas",
+      "cancelar_mis_reservas"
+    ],
+    "createdAt": "2024-01-01T08:00:00.000Z",
+    "updatedAt": "2025-01-09T00:00:00.000Z"
+  },
+  {
+    "id": "3",
+    "nombre": "Tablet",
+    "descripcion": "Vista simplificada para tablets físicas que muestran disponibilidad de un espacio específico",
+    "nivel": 1,
+    "permisos": [
+      "ver_estado_espacio",
+      "ver_disponibilidad_espacio"
+    ],
+    "createdAt": "2024-01-01T08:00:00.000Z",
+    "updatedAt": "2025-01-09T00:00:00.000Z"
+  }
+]
+

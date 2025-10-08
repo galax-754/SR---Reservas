@@ -1,0 +1,109 @@
+[
+  {
+    "id": "2",
+    "name": "Sala de Capacitación",
+    "type": "training-room",
+    "capacity": 15,
+    "location": "Piso 2",
+    "amenities": [
+      "Proyector",
+      "Pizarra",
+      "WiFi",
+      "Audio"
+    ],
+    "setupTypes": [
+      "Clase",
+      "Cabaret"
+    ],
+    "isActive": true,
+    "requiresCatering": true,
+    "tags": [
+      "1759890820295"
+    ],
+    "backgroundImage": "",
+    "description": "Espacio amplio ideal para capacitaciones y talleres",
+    "createdAt": "2024-01-01T10:00:00.000Z",
+    "updatedAt": "2025-10-08T18:00:41.122Z"
+  },
+  {
+    "id": "3",
+    "name": "Meeting Room B",
+    "type": "meeting-room",
+    "capacity": 8,
+    "location": "Piso 1",
+    "amenities": [
+      "TV",
+      "Pizarra",
+      "WiFi"
+    ],
+    "setupTypes": [
+      "Reunión"
+    ],
+    "isActive": false,
+    "requiresCatering": false,
+    "tags": [
+      "1759713348493"
+    ],
+    "backgroundImage": "",
+    "description": "Sala de reuniones íntima para equipos pequeños",
+    "createdAt": "2024-01-01T10:00:00.000Z",
+    "updatedAt": "2025-10-08T18:00:59.094Z"
+  },
+  {
+    "name": "Espacio1",
+    "type": "conference-room",
+    "capacity": 6,
+    "location": "",
+    "amenities": [],
+    "setupTypes": [
+      "Herradura"
+    ],
+    "isActive": true,
+    "requiresCatering": false,
+    "tags": [
+      "tag1"
+    ],
+    "backgroundImage": "",
+    "description": "",
+    "id": "1759713593039",
+    "createdAt": "2025-10-06T01:19:53.039Z",
+    "updatedAt": "2025-10-08T18:01:10.153Z"
+  },
+  {
+    "name": "ESPACIO prueba catering",
+    "type": "meeting-room",
+    "capacity": 13,
+    "location": "",
+    "amenities": [],
+    "setupTypes": [],
+    "isActive": true,
+    "requiresCatering": true,
+    "tags": [
+      "tag1"
+    ],
+    "backgroundImage": "",
+    "description": "",
+    "id": "1759720971086",
+    "createdAt": "2025-10-06T03:22:51.086Z",
+    "updatedAt": "2025-10-06T03:40:48.690Z",
+    "requiresGuestList": true
+  },
+  {
+    "name": "Nuevo espacio",
+    "type": "meeting-room",
+    "capacity": 19,
+    "location": "",
+    "amenities": [],
+    "setupTypes": [],
+    "isActive": true,
+    "requiresCatering": false,
+    "tags": [
+      "tag1"
+    ],
+    "backgroundImage": "",
+    "description": "",
+    "id": "1759789915329",
+    "createdAt": "2025-10-06T22:31:55.330Z",
+    "updatedAt": "2025-10-06T22:31:55.330Z"
+  }
+]

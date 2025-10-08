@@ -1,0 +1,55 @@
+[
+  {
+    "id": "1",
+    "nombre": "Juan Pérez García",
+    "correo": "juan.perez@example.com",
+    "organizacion": "InnovaLab",
+    "rol": "Usuario",
+    "estado": "Activo",
+    "createdAt": "2024-01-15T10:00:00.000Z",
+    "updatedAt": "2025-10-08T02:28:47.996Z",
+    "password": "$2b$10$P4yqK1IjQfT5dPGM6.WI3.Py/uO7ZqJK3QWmUwzIgaQ9Ja99WPAge",
+    "temporaryPassword": false,
+    "lastPasswordChange": "2025-10-08T02:28:47.991Z"
+  },
+  {
+    "nombre": "Kareny Valeria Garza Esparza",
+    "correo": "garzakareny5@gmail.com",
+    "organizacion": "Sofroma",
+    "rol": "Administrador",
+    "estado": "Activo",
+    "id": "1759787235971",
+    "createdAt": "2025-10-06T21:47:15.971Z",
+    "updatedAt": "2025-10-06T23:47:04.346Z",
+    "password": "$2b$10$Biq.sPXu5Mija.DMsg5hNejAh4R7yeXeGhERblIiSy2EwDwZyJ02.",
+    "temporaryPassword": false,
+    "lastPasswordChange": "2025-10-06T23:47:04.345Z"
+  },
+  {
+    "id": "1759889000001",
+    "nombre": "María González López",
+    "correo": "usuario@sistema.com",
+    "organizacion": "Sofroma",
+    "rol": "Usuario",
+    "estado": "Activo",
+    "createdAt": "2025-01-09T00:00:00.000Z",
+    "updatedAt": "2025-01-09T00:00:00.000Z",
+    "password": "$2b$10$WmDt1ze8fS6u.ILEic762usXxg3JAjltmg4fZkX2FZ5rVlyKx0qoC",
+    "temporaryPassword": false,
+    "lastPasswordChange": "2025-01-09T00:00:00.000Z"
+  },
+  {
+    "id": "1759889000002",
+    "nombre": "Tablet Sala de Capacitación",
+    "correo": "tablet.sala1@sistema.com",
+    "organizacion": "Sistema",
+    "rol": "Tablet",
+    "estado": "Activo",
+    "assignedSpaceId": "2",
+    "createdAt": "2025-01-09T00:00:00.000Z",
+    "updatedAt": "2025-01-09T00:00:00.000Z",
+    "password": "$2b$10$KSO.VYfYcX4sbryv.7FI3O1fEwdUY0KcryLnlaqgdi10qP2FrlgdG",
+    "temporaryPassword": false,
+    "lastPasswordChange": "2025-01-09T00:00:00.000Z"
+  }
+]

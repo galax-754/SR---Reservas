@@ -1,0 +1,461 @@
+/* Dashboard Glassmorphism Styles */
+
+/* Aplicar glassmorphism a todos los contenedores blancos */
+.dashboard-content-glass .bg-white,
+.dashboard-content-glass [class*="bg-white"] {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Textos en general - todos blancos */
+.dashboard-content-glass,
+.dashboard-content-glass * {
+  color: white !important;
+}
+
+/* Títulos y encabezados */
+.dashboard-content-glass h1,
+.dashboard-content-glass h2,
+.dashboard-content-glass h3,
+.dashboard-content-glass h4,
+.dashboard-content-glass h5,
+.dashboard-content-glass h6 {
+  color: white !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Párrafos y spans */
+.dashboard-content-glass p,
+.dashboard-content-glass span,
+.dashboard-content-glass div {
+  color: white !important;
+}
+
+/* Labels */
+.dashboard-content-glass label {
+  color: white !important;
+  font-weight: 500;
+}
+
+/* Textos de diferentes colores - ahora blancos */
+.dashboard-content-glass .text-gray-900,
+.dashboard-content-glass .text-gray-800,
+.dashboard-content-glass .text-gray-700,
+.dashboard-content-glass .text-gray-600,
+.dashboard-content-glass .text-gray-500 {
+  color: white !important;
+}
+
+/* Bordes blancos */
+.dashboard-content-glass .border,
+.dashboard-content-glass [class*="border-"] {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Tablas */
+.dashboard-content-glass table {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.dashboard-content-glass thead {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.dashboard-content-glass th {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  font-weight: 600;
+}
+
+.dashboard-content-glass td {
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dashboard-content-glass tbody tr {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dashboard-content-glass tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Inputs y selects */
+.dashboard-content-glass input,
+.dashboard-content-glass select,
+.dashboard-content-glass textarea {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: white !important;
+}
+
+.dashboard-content-glass input::placeholder,
+.dashboard-content-glass textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+.dashboard-content-glass input:focus,
+.dashboard-content-glass select:focus,
+.dashboard-content-glass textarea:focus {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Botones */
+.dashboard-content-glass button {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Botones con fondo azul */
+.dashboard-content-glass .bg-blue-600,
+.dashboard-content-glass .bg-blue-700,
+.dashboard-content-glass [class*="bg-blue"] {
+  background-color: rgba(59, 130, 246, 0.3) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: white !important;
+}
+
+.dashboard-content-glass .bg-blue-600:hover,
+.dashboard-content-glass .bg-blue-700:hover {
+  background-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+/* Botones rojos */
+.dashboard-content-glass .bg-red-600,
+.dashboard-content-glass .bg-red-700,
+.dashboard-content-glass [class*="bg-red"] {
+  background-color: rgba(239, 68, 68, 0.3) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: white !important;
+}
+
+.dashboard-content-glass .bg-red-600:hover,
+.dashboard-content-glass .bg-red-700:hover {
+  background-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Botones verdes */
+.dashboard-content-glass .bg-green-600,
+.dashboard-content-glass .bg-green-700,
+.dashboard-content-glass [class*="bg-green"] {
+  background-color: rgba(34, 197, 94, 0.3) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: white !important;
+}
+
+/* Botones naranjas */
+.dashboard-content-glass .bg-orange-600,
+.dashboard-content-glass [class*="bg-orange"] {
+  background-color: rgba(249, 115, 22, 0.3) !important;
+  backdrop-filter: blur(20px) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: white !important;
+}
+
+/* Badges y etiquetas */
+.dashboard-content-glass .bg-gray-100,
+.dashboard-content-glass .bg-gray-200,
+.dashboard-content-glass .bg-gray-50 {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px) !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Badges de colores específicos */
+.dashboard-content-glass .bg-blue-100,
+.dashboard-content-glass .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(147, 197, 253, 0.5) !important;
+}
+
+.dashboard-content-glass .text-blue-800,
+.dashboard-content-glass .text-blue-700,
+.dashboard-content-glass .text-blue-600 {
+  color: rgba(191, 219, 254, 1) !important;
+}
+
+.dashboard-content-glass .bg-green-100,
+.dashboard-content-glass .bg-green-50 {
+  background-color: rgba(34, 197, 94, 0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(134, 239, 172, 0.5) !important;
+}
+
+.dashboard-content-glass .text-green-800,
+.dashboard-content-glass .text-green-700,
+.dashboard-content-glass .text-green-600 {
+  color: rgba(187, 247, 208, 1) !important;
+}
+
+.dashboard-content-glass .bg-yellow-100,
+.dashboard-content-glass .bg-yellow-50 {
+  background-color: rgba(234, 179, 8, 0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(253, 224, 71, 0.5) !important;
+}
+
+.dashboard-content-glass .text-yellow-800,
+.dashboard-content-glass .text-yellow-700,
+.dashboard-content-glass .text-yellow-600 {
+  color: rgba(254, 240, 138, 1) !important;
+}
+
+.dashboard-content-glass .bg-red-100,
+.dashboard-content-glass .bg-red-50 {
+  background-color: rgba(239, 68, 68, 0.2) !important;
+  color: white !important;
+  border: 1px solid rgba(252, 165, 165, 0.5) !important;
+}
+
+.dashboard-content-glass .text-red-800,
+.dashboard-content-glass .text-red-700,
+.dashboard-content-glass .text-red-600 {
+  color: rgba(254, 202, 202, 1) !important;
+}
+
+/* Cards y paneles */
+.dashboard-content-glass .rounded-lg,
+.dashboard-content-glass .rounded,
+.dashboard-content-glass .rounded-xl {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Sombras blancas sutiles */
+.dashboard-content-glass .shadow,
+.dashboard-content-glass .shadow-sm,
+.dashboard-content-glass .shadow-md,
+.dashboard-content-glass .shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1),
+              0 2px 4px -1px rgba(255, 255, 255, 0.06) !important;
+}
+
+/* Hover effects */
+.dashboard-content-glass .hover\:bg-gray-50:hover,
+.dashboard-content-glass .hover\:bg-gray-100:hover {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Iconos - mantener blancos */
+.dashboard-content-glass svg {
+  color: white !important;
+}
+
+/* Checkboxes y radios */
+.dashboard-content-glass input[type="checkbox"],
+.dashboard-content-glass input[type="radio"] {
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dashboard-content-glass input[type="checkbox"]:checked,
+.dashboard-content-glass input[type="radio"]:checked {
+  background-color: rgba(59, 130, 246, 0.5) !important;
+  border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Divisores */
+.dashboard-content-glass hr,
+.dashboard-content-glass .divide-y > * {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Empty states y mensajes */
+.dashboard-content-glass .text-center p,
+.dashboard-content-glass .text-center h3 {
+  color: white !important;
+}
+
+/* Scrollbars personalizados */
+.dashboard-content-glass::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dashboard-content-glass::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+.dashboard-content-glass::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+}
+
+.dashboard-content-glass::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Modales dentro del dashboard */
+.dashboard-content-glass .modal-backdrop {
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Asegurar que los íconos de lucide-react sean blancos */
+.dashboard-content-glass [class*="lucide"] {
+  color: white !important;
+  stroke: white !important;
+}
+
+/* Progress bars */
+.dashboard-content-glass .bg-gray-200 {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+.dashboard-content-glass .bg-green-500,
+.dashboard-content-glass .bg-yellow-500,
+.dashboard-content-glass .bg-red-500 {
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Alertas y notificaciones */
+.dashboard-content-glass .bg-yellow-50 {
+  background-color: rgba(234, 179, 8, 0.15) !important;
+  border-color: rgba(253, 224, 71, 0.3) !important;
+}
+
+.dashboard-content-glass .bg-blue-50 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  border-color: rgba(147, 197, 253, 0.3) !important;
+}
+
+/* Tabs activos en el contenido */
+.dashboard-content-glass .border-blue-500 {
+  border-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.dashboard-content-glass .text-blue-600 {
+  color: white !important;
+  font-weight: 600;
+}
+
+/* Select options (cuando están abiertos) */
+.dashboard-content-glass select option {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  color: white !important;
+}
+
+/* Deshabilitar estilos grises en texto */
+.dashboard-content-glass .text-gray-400,
+.dashboard-content-glass .text-gray-300 {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA RESERVAS ===== */
+/* Mantener los colores oscuros de las reservas */
+
+/* Celdas de reserva completas - verde oscuro */
+.dashboard-content-glass .reservation-cell--complete {
+  background-color: #16a34a !important;
+}
+
+.dashboard-content-glass .reservation-cell--incomplete {
+  background-color: #d97706 !important;
+}
+
+.dashboard-content-glass .reservation-cell--cancelled {
+  background-color: #6b7280 !important;
+}
+
+/* Hover de reservas */
+.dashboard-content-glass .time-slot--occupied:hover .reservation-cell--complete,
+.dashboard-content-glass .reservation-hover-active .reservation-cell--complete {
+  background-color: #15803d !important;
+}
+
+.dashboard-content-glass .time-slot--occupied:hover .reservation-cell--incomplete,
+.dashboard-content-glass .reservation-hover-active .reservation-cell--incomplete {
+  background-color: #c2410c !important;
+}
+
+.dashboard-content-glass .time-slot--occupied:hover .reservation-cell--cancelled,
+.dashboard-content-glass .reservation-hover-active .reservation-cell--cancelled {
+  background-color: #4b5563 !important;
+}
+
+/* Colores de leyenda */
+.dashboard-content-glass .legend-color--complete {
+  background-color: #16a34a !important;
+}
+
+.dashboard-content-glass .legend-color--incomplete {
+  background-color: #d97706 !important;
+}
+
+.dashboard-content-glass .legend-color--cancelled {
+  background-color: #6b7280 !important;
+}
+
+/* Items de reserva en calendario */
+.dashboard-content-glass .calendar-reservation-item--complete {
+  background: #16a34a !important;
+  color: white !important;
+}
+
+.dashboard-content-glass .calendar-reservation-item--incomplete {
+  background: #d97706 !important;
+  color: white !important;
+}
+
+.dashboard-content-glass .calendar-reservation-item--cancelled {
+  background: #6b7280 !important;
+  color: white !important;
+}
+
+/* Badges de estado de reserva */
+.dashboard-content-glass .reservation-status-badge--complete {
+  background: #16a34a !important;
+  color: white !important;
+  border: 1px solid #22c55e !important;
+}
+
+.dashboard-content-glass .reservation-status-badge--incomplete {
+  background: #d97706 !important;
+  color: white !important;
+  border: 1px solid #f59e0b !important;
+}
+
+.dashboard-content-glass .reservation-status-badge--cancelled {
+  background: #6b7280 !important;
+  color: white !important;
+  border: 1px solid #9ca3af !important;
+}
+
+/* Cards de reserva */
+.dashboard-content-glass .reservation-card--complete {
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+  border-left-color: #22c55e !important;
+}
+
+.dashboard-content-glass .reservation-card--incomplete {
+  background: linear-gradient(135deg, #d97706 0%, #c2410c 100%) !important;
+  border-left-color: #f59e0b !important;
+}
+
+/* Textos dentro de reservas - siempre blancos */
+.dashboard-content-glass .reservation-cell-title--complete,
+.dashboard-content-glass .reservation-cell-title--incomplete,
+.dashboard-content-glass .reservation-cell-title--cancelled {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.dashboard-content-glass .reservation-cell-time--complete,
+.dashboard-content-glass .reservation-cell-time--incomplete,
+.dashboard-content-glass .reservation-cell-time--cancelled {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+

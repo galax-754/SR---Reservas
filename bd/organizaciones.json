@@ -1,0 +1,32 @@
+[
+  {
+    "id": "2",
+    "nombre": "InnovaLab",
+    "tipo": "Interna",
+    "estado": "Inactiva",
+    "descripcion": "Laboratorio de innovación y desarrollo",
+    "contacto": "Jefe de Laboratorio",
+    "telefono": "+52 55 2345 6789",
+    "correo": "info@innovalab.com",
+    "tieneLimiteHoras": true,
+    "limiteHoras": 40,
+    "horasUsadas": 17.5,
+    "createdAt": "2024-01-02T09:00:00.000Z",
+    "updatedAt": "2025-10-08T02:57:00.853Z"
+  },
+  {
+    "nombre": "Sofroma",
+    "tipo": "Interna",
+    "descripcion": "Descripcion",
+    "contacto": "Kareny",
+    "telefono": "455445",
+    "correo": "garzakareny5@gmail.com",
+    "tieneLimiteHoras": false,
+    "estado": "Activa",
+    "id": "1759787207643",
+    "createdAt": "2025-10-06T21:46:47.643Z",
+    "updatedAt": "2025-10-08T02:57:36.477Z",
+    "limiteHoras": "15",
+    "horasUsadas": 3
+  }
+]

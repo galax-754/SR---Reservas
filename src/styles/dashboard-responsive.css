@@ -1,0 +1,426 @@
+/* Dashboard Responsive Improvements */
+
+/* Bottom Navigation (< 1280px) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Ensure bottom navigation is properly positioned */
+@media (max-width: 1279px) {
+  body {
+    padding-bottom: 0;
+  }
+}
+
+/* Mobile-first sidebar improvements */
+@media (max-width: 767px) {
+  .dashboard-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .dashboard-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .dashboard-content {
+    margin-left: 0 !important;
+    width: 100%;
+  }
+
+  .dashboard-header {
+    padding: 0.75rem 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.125rem;
+  }
+}
+
+/* Tablet improvements */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .dashboard-sidebar {
+    width: 200px;
+  }
+
+  .dashboard-content {
+    margin-left: 200px;
+  }
+
+  .dashboard-card {
+    padding: 1.25rem;
+  }
+}
+
+/* Desktop improvements */
+@media (min-width: 1024px) {
+  .dashboard-sidebar {
+    width: 240px;
+  }
+
+  .dashboard-content {
+    margin-left: 240px;
+  }
+}
+
+/* Stats cards responsive */
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+/* Table responsive improvements */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 767px) {
+  table {
+    font-size: 0.875rem;
+  }
+
+  table th,
+  table td {
+    padding: 0.5rem;
+  }
+
+  /* Hide less important columns on mobile */
+  .hide-mobile-col {
+    display: none;
+  }
+}
+
+/* Form improvements for mobile */
+@media (max-width: 767px) {
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+/* Search and filters responsive */
+.filters-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .filters-row {
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+/* Action buttons responsive */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+@media (max-width: 639px) {
+  .action-buttons button {
+    flex: 1;
+    min-width: calc(50% - 0.25rem);
+  }
+}
+
+/* Card grid responsive */
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .card-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .card-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mobile menu button */
+.mobile-menu-button {
+  display: block;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 101;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 0.5rem;
+  color: white;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+@media (min-width: 768px) {
+  .mobile-menu-button {
+    display: none;
+  }
+}
+
+/* Overlay for mobile sidebar */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 99;
+}
+
+.sidebar-overlay.active {
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .sidebar-overlay {
+    display: none !important;
+  }
+}
+
+/* Responsive spacing utilities */
+.spacing-mobile {
+  padding: 1rem;
+}
+
+@media (min-width: 768px) {
+  .spacing-mobile {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .spacing-mobile {
+    padding: 2rem;
+  }
+}
+
+/* Touch-friendly interactive elements */
+@media (max-width: 767px) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+}
+
+/* Responsive text truncation */
+.truncate-mobile {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .truncate-mobile {
+    white-space: normal;
+  }
+}
+
+/* Modal adjustments for small screens */
+@media (max-width: 639px) {
+  .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    background: inherit;
+    z-index: 10;
+  }
+}
+
+/* Reservations Header - Mobile optimizations */
+@media (max-width: 639px) {
+  .reservations-header {
+    padding: 0.75rem;
+  }
+
+  /* Vista selector dropdown */
+  .view-selector-mobile {
+    width: 100%;
+  }
+
+  /* Actions menu dropdown */
+  .actions-menu-mobile {
+    position: absolute;
+    right: 0;
+    margin-top: 0.5rem;
+    min-width: 12rem;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    z-index: 100;
+    overflow: hidden;
+  }
+
+  .actions-menu-mobile button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .actions-menu-mobile button:hover {
+    background-color: #f9fafb;
+  }
+
+  .actions-menu-mobile button:not(:last-child) {
+    border-bottom: 1px solid #f3f4f6;
+  }
+
+  /* Active mode indicator */
+  .active-mode-indicator {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.875rem;
+  }
+}
+
+/* Reservations list mobile optimization */
+@media (max-width: 767px) {
+  .reservation-item {
+    padding: 1rem;
+  }
+
+  .reservation-item-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .reservation-date-badge {
+    width: 100%;
+    max-width: 4rem;
+  }
+
+  .reservation-meta {
+    gap: 0.5rem;
+  }
+
+  .reservation-meta-item {
+    font-size: 0.8125rem;
+  }
+
+  /* Compact action buttons in list items */
+  .reservation-actions {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .reservation-actions button {
+    flex: 1;
+    min-width: calc(50% - 0.25rem);
+  }
+}
+
+/* Day view mobile scroll improvements */
+@media (max-width: 767px) {
+  .day-view-container {
+    margin: 0.5rem;
+  }
+
+  .day-view-header {
+    padding: 0.5rem;
+    gap: 0.5rem;
+  }
+
+  .date-navigation-button {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  .date-navigation-button span {
+    display: none;
+  }
+
+  /* Show only icons on mobile */
+  .date-navigation-button svg {
+    margin: 0;
+  }
+
+  .space-navigation {
+    position: relative;
+    z-index: 10;
+  }
+}
+
+/* Overlay backdrop for mobile menu */
+.menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 90;
+  display: none;
+}
+
+.menu-backdrop.active {
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .menu-backdrop {
+    display: none !important;
+  }
+}
+

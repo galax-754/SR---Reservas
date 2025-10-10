@@ -7,6 +7,14 @@ import { CreateUsuarioData } from '@/types/user-management';
 // GET /api/usuarios - Obtener todos los usuarios
 export async function GET() {
   try {
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const { data: usuarios, error } = await supabaseAdmin
       .from('users')
       .select('*')
@@ -39,6 +47,14 @@ export async function GET() {
 // POST /api/usuarios - Crear nuevo usuario
 export async function POST(request: NextRequest) {
   try {
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const usuarioData: CreateUsuarioData = await request.json();
     
     // Validación de seguridad: No permitir creación de Super Administradores

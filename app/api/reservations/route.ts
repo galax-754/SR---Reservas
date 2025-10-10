@@ -32,6 +32,14 @@ interface CreateReservationData {
 // GET /api/reservations - Obtener todas las reservas
 export async function GET(request: NextRequest) {
   try {
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const { searchParams } = new URL(request.url);
     const spaceId = searchParams.get('spaceId');
     const userId = searchParams.get('userId');
@@ -86,6 +94,14 @@ export async function GET(request: NextRequest) {
 // POST /api/reservations - Crear nueva reserva
 export async function POST(request: NextRequest) {
   try {
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     console.log('📝 Datos recibidos para crear reserva:', JSON.stringify(body, null, 2));
     

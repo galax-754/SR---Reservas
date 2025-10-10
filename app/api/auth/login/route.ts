@@ -55,10 +55,10 @@ export async function POST(request: NextRequest) {
     }
 
     // No enviar el password en la respuesta y transformar campos
-    const { password, assigned_space_id, ...userWithoutPassword } = usuario;
+    const { password, ...userWithoutPassword } = usuario;
     const userTransformado = {
       ...userWithoutPassword,
-      assignedSpaceId: assigned_space_id || undefined
+      assignedSpaceId: usuario.assigned_space_id || undefined
     };
 
     return NextResponse.json({

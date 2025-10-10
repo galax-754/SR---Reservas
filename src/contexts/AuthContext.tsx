@@ -90,11 +90,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         updatedAt: data.user.updatedAt,
       }
 
-      console.log('🔍 AuthContext - Usuario cargado:', {
-        nombre: authUser.nombre,
-        rol: authUser.rol,
-        assignedSpaceId: authUser.assignedSpaceId
-      })
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔍 AuthContext - Usuario cargado:', {
+          nombre: authUser.nombre,
+          rol: authUser.rol,
+          assignedSpaceId: authUser.assignedSpaceId
+        })
+      }
 
       setUser(authUser)
       setPermissions(getRolePermissions(mappedRole, authUser.assignedSpaceId))

@@ -15,31 +15,90 @@ export function LoginSection() {
   const [isLoading, setIsLoading] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
   const [showPlayButton, setShowPlayButton] = useState(false)
+  const [useImageFallback, setUseImageFallback] = useState(false)
+  const [hasUserInteracted, setHasUserInteracted] = useState(false)
   
   const { login } = useAuth()
   const router = useRouter()
   const videoRefDesktop = useRef<HTMLVideoElement>(null)
   const videoRefMobile = useRef<HTMLVideoElement>(null)
+  const fallbackTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const interactionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Manejar reproducción automática del video
+  // Manejar reproducción automática del video con fallback a imagen
   useEffect(() => {
     const isMobile = window.innerWidth < 768
     const video = isMobile ? videoRefMobile.current : videoRefDesktop.current
     
     if (!video) return
 
+    // Función para activar fallback a imagen
+    const activateImageFallback = () => {
+      setUseImageFallback(true)
+      setShowPlayButton(false)
+      setIsVideoPlaying(false)
+      console.log('Activando fallback a imagen de fondo')
+    }
+
+    // Función para intentar reproducir video después de interacción del usuario
+    const tryPlayAfterInteraction = async () => {
+      if (hasUserInteracted) return // Solo intentar una vez
+      
+      setHasUserInteracted(true)
+      
+      try {
+        await video.play()
+        setIsVideoPlaying(true)
+        setShowPlayButton(false)
+        setUseImageFallback(false)
+        
+        // Limpiar todos los timeouts si el video inicia
+        if (fallbackTimeoutRef.current) {
+          clearTimeout(fallbackTimeoutRef.current)
+          fallbackTimeoutRef.current = null
+        }
+        if (interactionTimeoutRef.current) {
+          clearTimeout(interactionTimeoutRef.current)
+          interactionTimeoutRef.current = null
+        }
+      } catch (error) {
+        console.log('Error al reproducir video después de interacción:', error)
+        // Si falla después de la interacción, activar fallback inmediatamente
+        activateImageFallback()
+      }
+    }
+
     const handleLoadStart = () => {
+      // Limpiar timeout anterior si existe
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current)
+      }
+
       // Intentar reproducir cuando el video se carga
       video.play().catch(() => {
         // Si falla la reproducción automática, mostrar botón de play
         setShowPlayButton(true)
         setIsVideoPlaying(false)
       })
+
+      // Configurar timeout de 4 segundos para fallback a imagen
+      fallbackTimeoutRef.current = setTimeout(() => {
+        if (!isVideoPlaying && !hasUserInteracted) {
+          activateImageFallback()
+        }
+      }, 4000)
     }
 
     const handlePlay = () => {
       setIsVideoPlaying(true)
       setShowPlayButton(false)
+      setUseImageFallback(false)
+      
+      // Limpiar timeout si el video inicia correctamente
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current)
+        fallbackTimeoutRef.current = null
+      }
     }
 
     const handlePause = () => {
@@ -49,6 +108,9 @@ export function LoginSection() {
     const handleError = () => {
       setShowPlayButton(true)
       setIsVideoPlaying(false)
+      
+      // Activar fallback inmediatamente si hay error
+      activateImageFallback()
     }
 
     video.addEventListener('loadstart', handleLoadStart)
@@ -66,8 +128,55 @@ export function LoginSection() {
       video.removeEventListener('play', handlePlay)
       video.removeEventListener('pause', handlePause)
       video.removeEventListener('error', handleError)
+      
+      // Limpiar timeouts al desmontar
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current)
+        fallbackTimeoutRef.current = null
+      }
+      if (interactionTimeoutRef.current) {
+        clearTimeout(interactionTimeoutRef.current)
+        interactionTimeoutRef.current = null
+      }
     }
-  }, [])
+  }, [isVideoPlaying, hasUserInteracted])
+
+  // Función para manejar clics en móviles
+  const handleMobileInteraction = () => {
+    const isMobile = window.innerWidth < 768
+    if (!isMobile || hasUserInteracted || useImageFallback) return
+    
+    console.log('Usuario interactuó en móvil, intentando reproducir video...')
+    
+    // Limpiar timeout de fallback si existe
+    if (fallbackTimeoutRef.current) {
+      clearTimeout(fallbackTimeoutRef.current)
+      fallbackTimeoutRef.current = null
+    }
+    
+    // Intentar reproducir el video
+    const video = videoRefMobile.current
+    if (!video) return
+    
+    video.play()
+      .then(() => {
+        setIsVideoPlaying(true)
+        setShowPlayButton(false)
+        setUseImageFallback(false)
+        setHasUserInteracted(true)
+      })
+      .catch((error) => {
+        console.log('Error al reproducir video después de interacción:', error)
+        
+        // Configurar timeout de 2 segundos después de la interacción
+        // Si no funciona en 2 segundos, usar imagen de fondo
+        interactionTimeoutRef.current = setTimeout(() => {
+          if (!isVideoPlaying) {
+            activateImageFallback()
+          }
+        }, 2000)
+      })
+  }
 
   const handlePlayVideo = async () => {
     const isMobile = window.innerWidth < 768
@@ -79,8 +188,18 @@ export function LoginSection() {
       await video.play()
       setShowPlayButton(false)
       setIsVideoPlaying(true)
+      setUseImageFallback(false)
+      
+      // Limpiar timeout si el video inicia correctamente
+      if (fallbackTimeoutRef.current) {
+        clearTimeout(fallbackTimeoutRef.current)
+        fallbackTimeoutRef.current = null
+      }
     } catch (error) {
       console.error('Error al reproducir video:', error)
+      // Si falla, activar fallback a imagen
+      setUseImageFallback(true)
+      setShowPlayButton(false)
     }
   }
 
@@ -111,51 +230,68 @@ export function LoginSection() {
   }
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden">
-      {/* Imagen de fondo como fallback */}
+    <div 
+      className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden"
+      onClick={handleMobileInteraction}
+    >
+      {/* Imagen de fondo - Desktop */}
       <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        className="hidden md:block absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
         style={{
           backgroundImage: `url('/fondo_escritorio.png')`
         }}
       />
       
-      {/* Video de fondo - desktop */}
-      <video
-        ref={videoRefDesktop}
-        className="hidden md:block absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        webkit-playsinline="true"
-        onError={() => {
-          console.log('Error en video desktop, usando imagen de fondo')
+      {/* Imagen de fondo - Mobile */}
+      <div 
+        className="block md:hidden absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/fondo_movil.png')`
         }}
-      >
-        <source src="/Video_fondo_escritorio.mp4" type="video/mp4" />
-      </video>
+      />
       
-      {/* Video de fondo - mobile */}
-      <video
-        ref={videoRefMobile}
-        className="block md:hidden absolute inset-0 w-full h-full object-cover"
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        webkit-playsinline="true"
-        onError={() => {
-          console.log('Error en video móvil, usando imagen de fondo')
-        }}
-      >
-        <source src="/Video_fondo_movil.mp4" type="video/mp4" />
-      </video>
+      {/* Video de fondo - desktop (solo si no está en fallback) */}
+      {!useImageFallback && (
+        <video
+          ref={videoRefDesktop}
+          className="hidden md:block absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          webkit-playsinline="true"
+          onError={() => {
+            console.log('Error en video desktop, usando imagen de fondo')
+            setUseImageFallback(true)
+          }}
+        >
+          <source src="/Video_fondo_escritorio.mp4" type="video/mp4" />
+        </video>
+      )}
+      
+      {/* Video de fondo - mobile (solo si no está en fallback) */}
+      {!useImageFallback && (
+        <video
+          ref={videoRefMobile}
+          className="block md:hidden absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          webkit-playsinline="true"
+          onError={() => {
+            console.log('Error en video móvil, usando imagen de fondo')
+            setUseImageFallback(true)
+          }}
+        >
+          <source src="/Video_fondo_movil.mp4" type="video/mp4" />
+        </video>
+      )}
 
       {/* Botón de play para móviles cuando el video no se reproduce automáticamente */}
-      {showPlayButton && (
+      {showPlayButton && !useImageFallback && (
         <motion.button
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -179,6 +315,7 @@ export function LoginSection() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md relative z-10"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="bg-white/10 backdrop-blur-xl rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 border border-white/20">
           {/* Header */}

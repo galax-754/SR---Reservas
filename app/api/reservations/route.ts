@@ -78,67 +78,48 @@ export async function GET(request: NextRequest) {
     
     console.log('📋 Reservas obtenidas:', reservations?.length || 0);
     
-    // Transformar datos al formato esperado por el frontend
+    // Transformar datos al formato esperado por el frontend (versión simplificada)
     if (reservations && reservations.length > 0) {
-      // Obtener usuarios y espacios para hacer join
-      const userIds = [...new Set(reservations.map(r => r.user_id))];
-      const spaceIds = [...new Set(reservations.map(r => r.space_id))];
-      
-      const [usersResult, spacesResult] = await Promise.all([
-        supabaseAdmin.from('users').select('id, nombre, correo').in('id', userIds),
-        supabaseAdmin.from('spaces').select('*').in('id', spaceIds)
-      ]);
-      
-      const users = usersResult.data || [];
-      const spaces = spacesResult.data || [];
-      
       const transformedReservations = reservations.map(reservation => {
-        const user = users.find(u => u.id === reservation.user_id);
-        const space = spaces.find(s => s.id === reservation.space_id);
-        
-        // Extraer fecha y hora de start_time y end_time (convertir de UTC a hora local)
+        // Extraer fecha y hora de start_time y end_time
         const startDate = new Date(reservation.start_time);
         const endDate = new Date(reservation.end_time);
         
-        // Convertir a hora local (México es UTC-6)
-        const localStartDate = new Date(startDate.getTime() - (6 * 60 * 60 * 1000));
-        const localEndDate = new Date(endDate.getTime() - (6 * 60 * 60 * 1000));
-        
-        const date = localStartDate.toISOString().split('T')[0];
-        const startTime = localStartDate.toTimeString().substring(0, 5);
-        const endTime = localEndDate.toTimeString().substring(0, 5);
+        const date = startDate.toISOString().split('T')[0];
+        const startTime = startDate.toTimeString().substring(0, 5);
+        const endTime = endDate.toTimeString().substring(0, 5);
         
         return {
           id: reservation.id,
-          title: reservation.title,
-          coordinatorName: user?.nombre || 'Usuario desconocido',
-          coordinatorEmail: user?.correo || '',
-          coordinatorPhone: '', // No tenemos este dato en la BD
-          company: reservation.organization,
-          numberOfPeople: reservation.attendees,
-          space: space ? {
-            id: space.id,
-            name: space.name,
-            type: 'meeting-room', // Valor por defecto
-            capacity: space.capacity,
+          title: reservation.title || 'Reserva',
+          coordinatorName: 'Usuario', // Valor por defecto
+          coordinatorEmail: '',
+          coordinatorPhone: '',
+          company: reservation.organization || 'Sin organización',
+          numberOfPeople: reservation.attendees || 1,
+          space: {
+            id: reservation.space_id,
+            name: 'Espacio',
+            type: 'meeting-room',
+            capacity: 10,
             location: '',
-            amenities: space.equipment || [],
+            amenities: [],
             setupTypes: [],
-            isActive: space.active,
+            isActive: true,
             requiresCatering: false,
-            tags: space.tags || [],
-            backgroundImage: space.image_url || '',
-            description: space.description || '',
-            createdAt: space.created_at,
-            updatedAt: space.updated_at
-          } : null,
+            tags: [],
+            backgroundImage: '',
+            description: '',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          },
           date: date,
           startTime: startTime,
           endTime: endTime,
-          meetingType: 'presencial', // Valor por defecto
-          coffeeBreak: 'no', // Valor por defecto
-          notes: reservation.description,
-          status: reservation.status,
+          meetingType: 'presencial',
+          coffeeBreak: 'no',
+          notes: reservation.description || '',
+          status: reservation.status || 'confirmed',
           createdAt: reservation.created_at,
           updatedAt: reservation.updated_at
         };

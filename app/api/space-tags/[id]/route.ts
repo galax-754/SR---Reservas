@@ -31,7 +31,22 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       );
     }
     
-    return NextResponse.json({ data: tag });
+    // Transformar al formato esperado por el frontend
+    const transformedTag = {
+      id: tag.id,
+      name: tag.name,
+      color: tag.color || '#3B82F6',
+      allowedDays: tag.allowed_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+      allowedHours: {
+        start: tag.start_time || '08:00',
+        end: tag.end_time || '18:00'
+      },
+      description: tag.description || '',
+      createdAt: tag.created_at,
+      updatedAt: tag.updated_at
+    };
+    
+    return NextResponse.json({ data: transformedTag });
   } catch (error) {
     console.error('Error obteniendo etiqueta:', error);
     return NextResponse.json(

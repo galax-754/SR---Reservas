@@ -1884,11 +1884,11 @@ export function DashboardSection() {
 
   // Filtros para vista de lista
   const filteredReservations = getBaseReservations().filter(reservation => {
-    const matchesSearch = reservation.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    const matchesSearch = (reservation.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (reservation.coordinatorName && reservation.coordinatorName.toLowerCase().includes(searchQuery.toLowerCase())) ||
                          (reservation.company && reservation.company.toLowerCase().includes(searchQuery.toLowerCase()))
     
-    const matchesSpace = !filterSpace || reservation.space.name === filterSpace
+    const matchesSpace = !filterSpace || (reservation.space && reservation.space.name === filterSpace)
     const matchesDate = !filterDate || reservation.date === filterDate
     const matchesMeetingType = !filterMeetingType || reservation.meetingType === filterMeetingType
     const matchesStatus = !filterStatus || 
@@ -2363,7 +2363,7 @@ export function DashboardSection() {
                   </div>
                   <div>
                       <p className="font-medium text-gray-900">{reservation.coordinatorName || reservation.title}</p>
-                      <p className="text-sm text-gray-600">{reservation.space.name}</p>
+                      <p className="text-sm text-gray-600">{reservation.space?.name || 'Sin espacio'}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -3210,7 +3210,7 @@ export function DashboardSection() {
                             </span>
                           </div>
                           <div className="reservation-meta">
-                            <p className="reservation-type">{reservation.space.name}</p>
+                            <p className="reservation-type">{reservation.space?.name || 'Sin espacio'}</p>
                             <p className="reservation-meta">
                               {reservation.coordinatorName} • {reservation.company}
                             </p>
@@ -3444,7 +3444,7 @@ export function DashboardSection() {
                       <div className="flex items-center space-x-2 text-sm text-gray-600">
                         <Calendar className="w-4 h-4" />
                         <span>
-                          {dayOptions.filter(day => tag.allowedDays.includes(day.value)).map(day => day.label).join(', ')}
+                          {dayOptions.filter(day => (tag.allowedDays || []).includes(day.value)).map(day => day.label).join(', ')}
                         </span>
                       </div>
                     </div>
@@ -3975,7 +3975,7 @@ export function DashboardSection() {
                       </div>
                     </label>
                     <div className="text-xs text-white/70 text-right">
-                      {dayOptions.filter(day => tag.allowedDays.includes(day.value)).map(day => day.label).join(', ')}
+                      {dayOptions.filter(day => (tag.allowedDays || []).includes(day.value)).map(day => day.label).join(', ')}
                       <br />
                       {tag.allowedHours.start} - {tag.allowedHours.end}
                     </div>
@@ -4243,7 +4243,7 @@ export function DashboardSection() {
                           </div>
                         </div>
                         <div className="text-right text-sm text-white/70">
-                          <p>{dayOptions.filter(day => tag.allowedDays.includes(day.value)).map(day => day.label).join(', ')}</p>
+                          <p>{dayOptions.filter(day => (tag.allowedDays || []).includes(day.value)).map(day => day.label).join(', ')}</p>
                           <p>{tag.allowedHours.start} - {tag.allowedHours.end}</p>
                         </div>
                       </div>

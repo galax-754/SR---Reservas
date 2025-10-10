@@ -219,7 +219,7 @@ export async function POST(request: NextRequest) {
     const { data: newReservation, error: createError } = await supabaseAdmin
       .from('reservations')
       .insert({
-        id: String(Date.now()), // Generar ID único
+        id: crypto.randomUUID(), // Generar ID único
         space_id: body.space.id,
         user_id: user.id,
         title: body.title || 'Reserva',

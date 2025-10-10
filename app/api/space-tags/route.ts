@@ -26,7 +26,22 @@ export async function GET() {
       );
     }
     
-    return NextResponse.json({ data: tags || [] });
+    // Transformar datos de Supabase al formato esperado por el frontend
+    const transformedTags = (tags || []).map((tag: any) => ({
+      id: tag.id,
+      name: tag.name,
+      color: tag.color || '#3B82F6',
+      allowedDays: tag.allowed_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+      allowedHours: {
+        start: tag.start_time || '08:00',
+        end: tag.end_time || '18:00'
+      },
+      description: tag.description || '',
+      createdAt: tag.created_at,
+      updatedAt: tag.updated_at
+    }));
+    
+    return NextResponse.json({ data: transformedTags });
   } catch (error) {
     console.error('Error obteniendo etiquetas:', error);
     return NextResponse.json(

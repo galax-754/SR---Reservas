@@ -4320,18 +4320,18 @@ export function DashboardSection() {
           title={selectedSpace.name}
           size="lg"
         >
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             {/* Imagen de fondo si existe */}
             {selectedSpace.backgroundImage && (
-              <div className="h-48 bg-cover bg-center rounded-lg relative" style={{ backgroundImage: `url(${selectedSpace.backgroundImage})` }}>
+              <div className="h-32 sm:h-40 md:h-48 bg-cover bg-center rounded-lg relative" style={{ backgroundImage: `url(${selectedSpace.backgroundImage})` }}>
                 <div className="absolute inset-0 bg-black/20 rounded-lg" />
               </div>
             )}
 
             {/* Información básica */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Información Básica</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Información Básica</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-medium text-white/70 mb-1">Tipo de espacio</label>
                   <p className="text-sm text-white">
@@ -4363,18 +4363,18 @@ export function DashboardSection() {
             {/* Descripción */}
             {selectedSpace.description && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Descripción</h3>
-                <p className="text-sm text-white/80">{selectedSpace.description}</p>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Descripción</h3>
+                <p className="text-xs sm:text-sm text-white/80 leading-relaxed">{selectedSpace.description}</p>
               </div>
             )}
 
             {/* Amenidades */}
             {selectedSpace.amenities.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Amenidades</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Amenidades</h3>
                 <div className="flex flex-wrap gap-2">
                   {selectedSpace.amenities.map((amenity, index) => (
-                    <span key={index} className="px-3 py-1 bg-blue-500/20 text-blue-200 text-sm rounded-full border border-blue-400/30">
+                    <span key={index} className="px-2 sm:px-3 py-1 bg-blue-500/20 text-blue-200 text-xs sm:text-sm rounded-full border border-blue-400/30">
                       {amenity}
                     </span>
                   ))}
@@ -4385,10 +4385,10 @@ export function DashboardSection() {
             {/* Tipos de acomodo */}
             {selectedSpace.setupTypes.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Tipos de Acomodo</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Tipos de Acomodo</h3>
                 <div className="flex flex-wrap gap-2">
                   {selectedSpace.setupTypes.map((setupType, index) => (
-                    <span key={index} className="px-3 py-1 bg-green-500/20 text-green-200 text-sm rounded-full border border-green-400/30">
+                    <span key={index} className="px-2 sm:px-3 py-1 bg-green-500/20 text-green-200 text-xs sm:text-sm rounded-full border border-green-400/30">
                       {setupType}
                     </span>
                   ))}
@@ -4399,29 +4399,29 @@ export function DashboardSection() {
             {/* Tags asignados */}
             {selectedSpace.tags.length > 0 && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Tags de Restricción Horaria</h3>
-                <div className="space-y-3">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Tags de Restricción Horaria</h3>
+                <div className="space-y-2 sm:space-y-3">
                   {selectedSpace.tags.map((tagId) => {
                     const tag = tags.find(t => t.id === tagId)
                     if (!tag) return null
                     
                     return (
-                      <div key={tagId} className="flex items-center justify-between p-3 bg-white/5 border border-white/30 rounded-lg">
+                      <div key={tagId} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-white/5 border border-white/30 rounded-lg gap-2">
                         <div className="flex items-center space-x-3">
                           <div 
-                            className="w-4 h-4 rounded"
+                            className="w-4 h-4 rounded flex-shrink-0"
                             style={{ backgroundColor: tag.color }}
                           />
-                          <div>
-                            <p className="font-medium text-white">{tag.name}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-medium text-white text-sm sm:text-base truncate">{tag.name}</p>
                             {tag.description && (
-                              <p className="text-sm text-white/70">{tag.description}</p>
+                              <p className="text-xs sm:text-sm text-white/70 truncate">{tag.description}</p>
                             )}
                           </div>
                         </div>
-                        <div className="text-right text-sm text-white/70">
-                          <p>{dayOptions.filter(day => (tag.allowedDays || []).includes(day.value)).map(day => day.label).join(', ')}</p>
-                          <p>{tag.allowedHours.start} - {tag.allowedHours.end}</p>
+                        <div className="text-left sm:text-right text-xs sm:text-sm text-white/70">
+                          <p className="truncate">{dayOptions.filter(day => (tag.allowedDays || []).includes(day.value)).map(day => day.label).join(', ')}</p>
+                          <p className="font-medium">{tag.allowedHours.start} - {tag.allowedHours.end}</p>
                         </div>
                       </div>
                     )
@@ -4432,25 +4432,25 @@ export function DashboardSection() {
 
             {/* Configuraciones */}
             <div>
-              <h3 className="text-lg font-semibold text-white mb-4">Configuraciones</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Configuraciones</h3>
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   {selectedSpace.requiresCatering ? (
-                    <Coffee className="w-4 h-4 text-green-300" />
+                    <Coffee className="w-4 h-4 text-green-300 flex-shrink-0" />
                   ) : (
-                    <X className="w-4 h-4 text-white/40" />
+                    <X className="w-4 h-4 text-white/40 flex-shrink-0" />
                   )}
-                  <span className="text-sm text-white">
+                  <span className="text-xs sm:text-sm text-white">
                     Coffee Break: {selectedSpace.requiresCatering ? 'Permitido' : 'No permitido'}
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
                   {selectedSpace.requiresGuestList ? (
-                    <CheckCircle className="w-4 h-4 text-green-300" />
+                    <CheckCircle className="w-4 h-4 text-green-300 flex-shrink-0" />
                   ) : (
-                    <X className="w-4 h-4 text-white/40" />
+                    <X className="w-4 h-4 text-white/40 flex-shrink-0" />
                   )}
-                  <span className="text-sm text-white">
+                  <span className="text-xs sm:text-sm text-white">
                     Lista de Invitados: {selectedSpace.requiresGuestList ? 'Requerida' : 'No requerida'}
                   </span>
                 </div>
@@ -4460,21 +4460,22 @@ export function DashboardSection() {
             {/* Horario Disponible */}
             {selectedSpace.availableHours && (
               <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Horario Disponible</h3>
-                <div className="flex items-center space-x-4 bg-white/5 border border-white/30 rounded-lg p-4">
+                <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Horario Disponible</h3>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 bg-white/5 border border-white/30 rounded-lg p-3 sm:p-4">
                   <div className="flex items-center space-x-2">
-                    <Clock className="w-5 h-5 text-blue-300" />
+                    <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-blue-300 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-white/70">Hora de inicio</p>
-                      <p className="text-lg font-semibold text-white">{selectedSpace.availableHours.start}</p>
+                      <p className="text-xs sm:text-sm text-white/70">Hora de inicio</p>
+                      <p className="text-base sm:text-lg font-semibold text-white">{selectedSpace.availableHours.start}</p>
                     </div>
                   </div>
-                  <div className="text-white/40">—</div>
+                  <div className="text-white/40 text-center sm:hidden">—</div>
+                  <div className="hidden sm:block text-white/40">—</div>
                   <div className="flex items-center space-x-2">
-                    <Clock className="w-5 h-5 text-blue-300" />
+                    <Clock className="w-4 sm:w-5 h-4 sm:h-5 text-blue-300 flex-shrink-0" />
                     <div>
-                      <p className="text-sm text-white/70">Hora de fin</p>
-                      <p className="text-lg font-semibold text-white">{selectedSpace.availableHours.end}</p>
+                      <p className="text-xs sm:text-sm text-white/70">Hora de fin</p>
+                      <p className="text-base sm:text-lg font-semibold text-white">{selectedSpace.availableHours.end}</p>
                     </div>
                   </div>
                 </div>
@@ -4482,11 +4483,11 @@ export function DashboardSection() {
             )}
 
             {/* Botones de acción */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-white/30">
+            <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 sm:pt-6 border-t border-white/30">
               <Button 
-                variant="outline" 
                 onClick={() => setShowSpaceDetails(false)}
-                className="text-white hover:bg-white/20 border-white/30"
+                className="bg-gray-600 hover:bg-gray-700 text-white border-0 shadow-lg w-full sm:w-auto"
+                size="md"
               >
                 Cerrar
               </Button>
@@ -4496,7 +4497,8 @@ export function DashboardSection() {
                     setShowSpaceDetails(false)
                     handleEditSpace(selectedSpace)
                   }}
-                  className="bg-blue-500/30 hover:bg-blue-500/50 text-white border border-white/30"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg w-full sm:w-auto"
+                  size="md"
                 >
                   Editar Espacio
                 </Button>

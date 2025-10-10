@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { UpdateOrganizacionData } from '@/types/user-management';
 
 // GET /api/organizaciones/[id] - Obtener una organización por ID
@@ -8,16 +8,44 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const organizacion = await database.getById('organizaciones', params.id);
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: organizacion, error } = await supabaseAdmin
+      .from('organizations')
+      .select('*')
+      .eq('id', params.id)
+      .single();
     
-    if (!organizacion) {
+    if (error || !organizacion) {
       return NextResponse.json(
         { error: 'Organización no encontrada' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ data: organizacion });
+    // Transformar al formato esperado por el frontend
+    const organizacionTransformada = {
+      id: organizacion.id,
+      nombre: organizacion.name,
+      tipo: 'Interna',
+      estado: organizacion.active ? 'Activa' : 'Inactiva',
+      descripcion: organizacion.description || '',
+      contacto: '',
+      telefono: '',
+      correo: '',
+      tieneLimiteHoras: false,
+      limiteHorasMensuales: 0,
+      horasUsadas: 0,
+      createdAt: organizacion.created_at,
+      updatedAt: organizacion.updated_at
+    };
+
+    return NextResponse.json({ data: organizacionTransformada });
   } catch (error) {
     console.error('Error obteniendo organización:', error);
     return NextResponse.json(
@@ -33,17 +61,51 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const organizacionData: UpdateOrganizacionData = await request.json();
-    const updatedOrganizacion = await database.update('organizaciones', params.id, organizacionData);
     
-    if (!updatedOrganizacion) {
+    const { data: updatedOrganizacion, error } = await supabaseAdmin
+      .from('organizations')
+      .update({
+        name: organizacionData.nombre,
+        description: organizacionData.descripcion,
+        active: organizacionData.estado !== 'Inactiva'
+      })
+      .eq('id', params.id)
+      .select()
+      .single();
+    
+    if (error || !updatedOrganizacion) {
       return NextResponse.json(
         { error: 'Organización no encontrada' },
         { status: 404 }
       );
     }
     
-    return NextResponse.json({ data: updatedOrganizacion });
+    // Transformar al formato esperado
+    const organizacionTransformada = {
+      id: updatedOrganizacion.id,
+      nombre: updatedOrganizacion.name,
+      tipo: 'Interna',
+      estado: updatedOrganizacion.active ? 'Activa' : 'Inactiva',
+      descripcion: updatedOrganizacion.description || '',
+      contacto: '',
+      telefono: '',
+      correo: '',
+      tieneLimiteHoras: false,
+      limiteHorasMensuales: 0,
+      horasUsadas: 0,
+      createdAt: updatedOrganizacion.created_at,
+      updatedAt: updatedOrganizacion.updated_at
+    };
+    
+    return NextResponse.json({ data: organizacionTransformada });
   } catch (error) {
     console.error('Error actualizando organización:', error);
     return NextResponse.json(
@@ -59,20 +121,57 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const organizacion = await database.getById('organizaciones', params.id);
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: organizacion, error: getError } = await supabaseAdmin
+      .from('organizations')
+      .select('*')
+      .eq('id', params.id)
+      .single();
     
-    if (!organizacion) {
+    if (getError || !organizacion) {
       return NextResponse.json(
         { error: 'Organización no encontrada' },
         { status: 404 }
       );
     }
     
-    const updatedOrganizacion = await database.update('organizaciones', params.id, {
-      estado: 'Inactiva'
-    });
+    const { data: updatedOrganizacion, error: updateError } = await supabaseAdmin
+      .from('organizations')
+      .update({ active: false })
+      .eq('id', params.id)
+      .select()
+      .single();
     
-    return NextResponse.json({ data: updatedOrganizacion });
+    if (updateError) {
+      return NextResponse.json(
+        { error: 'Error desactivando organización' },
+        { status: 500 }
+      );
+    }
+
+    const organizacionTransformada = {
+      id: updatedOrganizacion.id,
+      nombre: updatedOrganizacion.name,
+      tipo: 'Interna',
+      estado: 'Inactiva',
+      descripcion: updatedOrganizacion.description || '',
+      contacto: '',
+      telefono: '',
+      correo: '',
+      tieneLimiteHoras: false,
+      limiteHorasMensuales: 0,
+      horasUsadas: 0,
+      createdAt: updatedOrganizacion.created_at,
+      updatedAt: updatedOrganizacion.updated_at
+    };
+    
+    return NextResponse.json({ data: organizacionTransformada });
   } catch (error) {
     console.error('Error desactivando organización:', error);
     return NextResponse.json(
@@ -88,9 +187,20 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const organizacion = await database.getById('organizaciones', params.id);
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: organizacion, error: getError } = await supabaseAdmin
+      .from('organizations')
+      .select('*')
+      .eq('id', params.id)
+      .single();
     
-    if (!organizacion) {
+    if (getError || !organizacion) {
       return NextResponse.json(
         { error: 'Organización no encontrada' },
         { status: 404 }
@@ -98,14 +208,25 @@ export async function DELETE(
     }
     
     // Verificar que la organización esté inactiva antes de eliminar
-    if (organizacion.estado !== 'Inactiva') {
+    if (organizacion.active) {
       return NextResponse.json(
         { error: 'Solo se pueden eliminar organizaciones inactivas. Desactívala primero.' },
         { status: 400 }
       );
     }
     
-    await database.delete('organizaciones', params.id);
+    const { error: deleteError } = await supabaseAdmin
+      .from('organizations')
+      .delete()
+      .eq('id', params.id);
+
+    if (deleteError) {
+      return NextResponse.json(
+        { error: 'Error eliminando organización' },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json({ message: 'Organización eliminada exitosamente' });
   } catch (error) {
     console.error('Error eliminando organización:', error);

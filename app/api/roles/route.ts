@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+
 import { supabaseAdmin } from '@/lib/supabase/server';
 
 // GET /api/roles - Obtener todos los roles
@@ -25,7 +26,18 @@ export async function GET() {
       );
     }
     
-    return NextResponse.json({ data: roles || [] });
+    // Transformar datos de Supabase al formato esperado por el frontend
+    const rolesTransformados = (roles || []).map((rol: any) => ({
+      id: rol.id,
+      nombre: rol.name,
+      descripcion: rol.description || '',
+      nivel: 1, // Valor por defecto
+      permisos: rol.permissions || [],
+      createdAt: rol.created_at,
+      updatedAt: rol.updated_at || rol.created_at
+    }));
+    
+    return NextResponse.json({ data: rolesTransformados });
   } catch (error) {
     console.error('Error obteniendo roles:', error);
     return NextResponse.json(

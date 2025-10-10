@@ -1,136 +1,67 @@
-# Base de Datos Local - Sistema de Reservas
+# Base de Datos - Sistema de Reservas
 
-Este directorio contiene los archivos JSON que funcionan como base de datos local para el sistema de reservas de espacios.
+## ⚠️ IMPORTANTE: Migración completada a Supabase
 
-## Estructura de Archivos
+**Los archivos JSON han sido eliminados** ya que toda la aplicación ahora usa **Supabase** como base de datos.
 
-### 📁 Archivos de Datos
+## ✅ Estado actual
 
-- **`spaces.json`** - Contiene todos los espacios disponibles para reserva
-- **`spaceTags.json`** - Contiene las etiquetas de horarios y restricciones de espacios
-- **`reservations.json`** - Contiene todas las reservas realizadas
+- **Base de datos:** Supabase (PostgreSQL)
+- **Archivos JSON:** Eliminados (ya no necesarios)
+- **APIs:** Todas migradas a Supabase
+- **Datos:** Migrados y funcionando correctamente
 
-### 📁 Directorio de Backups
+## 🔄 Si necesitas restaurar datos
 
-- **`backups/`** - Contiene respaldos automáticos de la base de datos organizados por fecha
+Si necesitas acceder a los datos originales, puedes:
 
-## Comandos Disponibles
+1. **Ver en Supabase:** Accede a tu proyecto en [supabase.com](https://supabase.com)
+2. **Usar el script de migración:** `node scripts/migrate-to-supabase.js` (para re-migrar)
+3. **Revisar el historial de Git:** Los archivos JSON están en commits anteriores
 
-### 🚀 Inicializar Base de Datos
+## 📊 Tablas en Supabase
+
+- `organizations` - Organizaciones
+- `roles` - Roles y permisos
+- `space_tags` - Etiquetas de espacios
+- `spaces` - Espacios disponibles
+- `users` - Usuarios del sistema
+- `reservations` - Reservaciones
+
+## 🚀 Scripts disponibles
+
+### Migrar datos a Supabase
 ```bash
-npm run db:init
+node scripts/migrate-to-supabase.js
 ```
-- Crea la carpeta `bd` si no existe
-- Inicializa los archivos JSON con datos de ejemplo
-- Útil para configurar el proyecto por primera vez
+- Migra todos los datos de archivos JSON a Supabase
+- Limpia las tablas existentes antes de migrar
+- Útil para restaurar datos desde respaldos
 
-### 💾 Crear Backup
+### Probar conexión con Supabase
 ```bash
-npm run db:backup
+# Visita: http://localhost:3000/api/test-supabase
 ```
-- Crea un respaldo completo de todos los archivos JSON
-- Los backups se guardan en `bd/backups/backup-YYYY-MM-DD/`
-- Útil antes de hacer cambios importantes
+- Verifica que la conexión con Supabase funcione
+- Muestra estadísticas de las tablas
 
-### 🔄 Resetear Base de Datos
-```bash
-npm run db:reset
-```
-- ⚠️ **PELIGROSO**: Elimina todos los datos existentes
-- Crea automáticamente un backup antes del reset
-- Requiere confirmación manual
+## 🔧 Configuración
 
-## Estructura de Datos
+Asegúrate de tener configuradas las variables de entorno:
 
-### Espacios (`spaces.json`)
-```json
-{
-  "id": "string",
-  "name": "string",
-  "type": "string",
-  "capacity": "number",
-  "location": "string",
-  "amenities": ["string"],
-  "setupTypes": ["string"],
-  "isActive": "boolean",
-  "requiresCatering": "boolean",
-  "tags": ["string"],
-  "backgroundImage": "string",
-  "description": "string",
-  "createdAt": "string (ISO)",
-  "updatedAt": "string (ISO)"
-}
+```env
+NEXT_PUBLIC_SUPABASE_URL=tu_url_de_supabase
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu_clave_anonima
+SUPABASE_SERVICE_ROLE_KEY=tu_clave_de_servicio
 ```
 
-### Tags de Espacios (`spaceTags.json`)
-```json
-{
-  "id": "string",
-  "name": "string",
-  "color": "string (hex)",
-  "allowedDays": ["string"],
-  "allowedHours": {
-    "start": "string (HH:MM)",
-    "end": "string (HH:MM)"
-  },
-  "description": "string",
-  "createdAt": "string (ISO)",
-  "updatedAt": "string (ISO)"
-}
-```
+## 📈 Ventajas de Supabase
 
-### Reservas (`reservations.json`)
-```json
-{
-  "id": "string",
-  "spaceId": "string",
-  "userId": "string",
-  "userName": "string",
-  "userEmail": "string",
-  "title": "string",
-  "description": "string",
-  "startDate": "string (ISO)",
-  "endDate": "string (ISO)",
-  "status": "pending | confirmed | cancelled",
-  "attendees": "number",
-  "requirements": ["string"],
-  "createdAt": "string (ISO)",
-  "updatedAt": "string (ISO)"
-}
-```
+- ✅ **Escalabilidad:** Base de datos PostgreSQL profesional
+- ✅ **Seguridad:** Autenticación y autorización integradas
+- ✅ **Real-time:** Actualizaciones en tiempo real
+- ✅ **Backup automático:** Respaldo automático de datos
+- ✅ **API REST:** API automática generada
+- ✅ **Dashboard:** Interfaz web para administrar datos
 
-## Servicios API
-
-El sistema incluye servicios API que manejan automáticamente los archivos JSON:
-
-- **`SpacesAPI`** - Gestión de espacios
-- **`SpaceTagsAPI`** - Gestión de etiquetas
-- **`ReservationsAPI`** - Gestión de reservas
-- **`DatabaseService`** - Servicio base para operaciones CRUD
-
-## Migración Futura
-
-Este sistema está diseñado para facilitar la migración a una base de datos real:
-
-1. Los servicios API mantienen la misma interfaz
-2. Solo necesitarás cambiar la implementación del `DatabaseService`
-3. Los datos JSON pueden importarse directamente a la nueva BD
-
-## Consideraciones de Seguridad
-
-- Los archivos JSON están en el servidor local
-- No exponer la carpeta `bd` en producción
-- Usar backups regulares
-- Considerar encriptación para datos sensibles
-
-## Mantenimiento
-
-- Hacer backups antes de cambios importantes
-- Monitorear el tamaño de los archivos JSON
-- Limpiar backups antiguos periódicamente
-- Validar integridad de datos regularmente
-
-
-
-
-
+**¡La aplicación ahora es completamente independiente de archivos JSON!** 🎉

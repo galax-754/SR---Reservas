@@ -273,7 +273,7 @@ export function ReservationForm({
       date: reservation.date || '',
       startTime: reservation.startTime || '',
       endTime: reservation.endTime || '',
-      hasCatering: reservation.coffeeBreak || '',
+      hasCatering: (reservation.coffeeBreak === 'si' || reservation.coffeeBreak === 'no') ? reservation.coffeeBreak : '',
       cateringCompany: reservation.cateringProvider?.name || ''
     };
     

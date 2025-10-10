@@ -55,15 +55,23 @@ export async function POST(request: NextRequest) {
     }
 
     // No enviar el password en la respuesta y transformar campos
-    const { password, ...userWithoutPassword } = usuario;
-    const userTransformado = {
-      ...userWithoutPassword,
+    const userWithoutPassword = {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      correo: usuario.correo,
+      organizacion: usuario.organizacion,
+      rol: usuario.rol,
+      estado: usuario.estado,
+      temporary_password: usuario.temporary_password,
+      last_password_change: usuario.last_password_change,
+      created_at: usuario.created_at,
+      updated_at: usuario.updated_at,
       assignedSpaceId: usuario.assigned_space_id || undefined
     };
 
     return NextResponse.json({
       message: 'Login exitoso',
-      user: userTransformado,
+      user: userWithoutPassword,
       requirePasswordChange: usuario.temporary_password
     });
 

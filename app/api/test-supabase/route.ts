@@ -20,6 +20,14 @@ export async function GET() {
     // Importar dinámicamente para evitar problemas de build
     const { supabaseAdmin } = await import('@/lib/supabase/server')
 
+
+    if (!supabaseAdmin) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Supabase no está configurado'
+      }, { status: 500 })
+    }
+
     // Probar conexión básica
     const { data, error } = await supabaseAdmin
       .from('users')

@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { LogIn, Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { LogIn, Eye, EyeOff, AlertCircle, Play } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
@@ -13,9 +13,76 @@ export function LoginSection() {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [showPlayButton, setShowPlayButton] = useState(false)
   
   const { login } = useAuth()
   const router = useRouter()
+  const videoRefDesktop = useRef<HTMLVideoElement>(null)
+  const videoRefMobile = useRef<HTMLVideoElement>(null)
+
+  // Manejar reproducción automática del video
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768
+    const video = isMobile ? videoRefMobile.current : videoRefDesktop.current
+    
+    if (!video) return
+
+    const handleLoadStart = () => {
+      // Intentar reproducir cuando el video se carga
+      video.play().catch(() => {
+        // Si falla la reproducción automática, mostrar botón de play
+        setShowPlayButton(true)
+        setIsVideoPlaying(false)
+      })
+    }
+
+    const handlePlay = () => {
+      setIsVideoPlaying(true)
+      setShowPlayButton(false)
+    }
+
+    const handlePause = () => {
+      setIsVideoPlaying(false)
+    }
+
+    const handleError = () => {
+      setShowPlayButton(true)
+      setIsVideoPlaying(false)
+    }
+
+    video.addEventListener('loadstart', handleLoadStart)
+    video.addEventListener('play', handlePlay)
+    video.addEventListener('pause', handlePause)
+    video.addEventListener('error', handleError)
+
+    // Intentar reproducir inmediatamente
+    video.play().catch(() => {
+      setShowPlayButton(true)
+    })
+
+    return () => {
+      video.removeEventListener('loadstart', handleLoadStart)
+      video.removeEventListener('play', handlePlay)
+      video.removeEventListener('pause', handlePause)
+      video.removeEventListener('error', handleError)
+    }
+  }, [])
+
+  const handlePlayVideo = async () => {
+    const isMobile = window.innerWidth < 768
+    const video = isMobile ? videoRefMobile.current : videoRefDesktop.current
+    
+    if (!video) return
+
+    try {
+      await video.play()
+      setShowPlayButton(false)
+      setIsVideoPlaying(true)
+    } catch (error) {
+      console.error('Error al reproducir video:', error)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,27 +112,64 @@ export function LoginSection() {
 
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 overflow-hidden">
+      {/* Imagen de fondo como fallback */}
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/fondo_escritorio.png')`
+        }}
+      />
+      
       {/* Video de fondo - desktop */}
       <video
+        ref={videoRefDesktop}
         className="hidden md:block absolute inset-0 w-full h-full object-cover"
         autoPlay
         muted
         loop
         playsInline
+        preload="auto"
+        webkit-playsinline="true"
+        onError={() => {
+          console.log('Error en video desktop, usando imagen de fondo')
+        }}
       >
         <source src="/Video_fondo_escritorio.mp4" type="video/mp4" />
       </video>
       
       {/* Video de fondo - mobile */}
       <video
+        ref={videoRefMobile}
         className="block md:hidden absolute inset-0 w-full h-full object-cover"
         autoPlay
         muted
         loop
         playsInline
+        preload="auto"
+        webkit-playsinline="true"
+        onError={() => {
+          console.log('Error en video móvil, usando imagen de fondo')
+        }}
       >
         <source src="/Video_fondo_movil.mp4" type="video/mp4" />
       </video>
+
+      {/* Botón de play para móviles cuando el video no se reproduce automáticamente */}
+      {showPlayButton && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="absolute inset-0 z-20 flex items-center justify-center bg-black/30 backdrop-blur-sm"
+          onClick={handlePlayVideo}
+        >
+          <div className="text-center">
+            <div className="bg-white/95 backdrop-blur-md rounded-full p-4 sm:p-6 shadow-2xl hover:bg-white transition-colors mb-3">
+              <Play className="w-8 h-8 sm:w-12 sm:h-12 text-gray-800 ml-1 mx-auto" fill="currentColor" />
+            </div>
+            <p className="text-white text-sm font-medium">Toca para reproducir video</p>
+          </div>
+        </motion.button>
+      )}
       
       {/* Overlay oscuro */}
       <div className="absolute inset-0 bg-black/40" />

@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { authService } from '@/services/auth';
-import type { Usuario } from '@/types/user-management';
 
 // POST /api/auth/login - Autenticar usuario
 export async function POST(request: NextRequest) {
   try {
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const { correo, password } = await request.json();
 
     if (!correo || !password) {
@@ -15,11 +22,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Buscar usuario por correo
-    const usuarios = await database.getAll<Usuario>('usuarios');
-    const usuario = usuarios.find(u => u.correo.toLowerCase() === correo.toLowerCase());
+    // Buscar usuario por correo en Supabase
+    const { data: usuario, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('correo', correo.toLowerCase())
+      .single();
 
-    if (!usuario) {
+    if (error || !usuario) {
       return NextResponse.json(
         { error: 'Credenciales inválidas' },
         { status: 401 }
@@ -50,7 +60,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: 'Login exitoso',
       user: userWithoutPassword,
-      requirePasswordChange: usuario.temporaryPassword
+      requirePasswordChange: usuario.temporary_password
     });
 
   } catch (error) {

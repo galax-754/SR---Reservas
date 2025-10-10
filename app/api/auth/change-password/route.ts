@@ -1,12 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { authService } from '@/services/auth';
 import { emailService } from '@/services/email';
-import type { Usuario } from '@/types/user-management';
 
 // POST /api/auth/change-password - Cambiar contraseña
 export async function POST(request: NextRequest) {
   try {
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const { userId, oldPassword, newPassword } = await request.json();
 
     if (!userId || !oldPassword || !newPassword) {
@@ -25,10 +32,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obtener usuario
-    const usuario = await database.getById<Usuario>('usuarios', userId);
+    // Obtener usuario de Supabase
+    const { data: usuario, error: getUserError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
 
-    if (!usuario) {
+    if (getUserError || !usuario) {
       return NextResponse.json(
         { error: 'Usuario no encontrado' },
         { status: 404 }
@@ -48,12 +59,25 @@ export async function POST(request: NextRequest) {
     // Hashear nueva contraseña
     const hashedPassword = await authService.hashPassword(newPassword);
 
-    // Actualizar usuario
-    const updatedUser = await database.update<Usuario>('usuarios', userId, {
-      password: hashedPassword,
-      temporaryPassword: false,
-      lastPasswordChange: new Date().toISOString()
-    });
+    // Actualizar usuario en Supabase
+    const { data: updatedUser, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({
+        password: hashedPassword,
+        temporary_password: false,
+        last_password_change: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error actualizando contraseña:', updateError);
+      return NextResponse.json(
+        { error: 'Error actualizando contraseña' },
+        { status: 500 }
+      );
+    }
 
     // Enviar email de confirmación (sin bloquear la respuesta)
     emailService.sendPasswordChangeConfirmation(usuario.correo, usuario.nombre)

@@ -28,10 +28,13 @@ export async function GET() {
       );
     }
     
-    // Remover contraseñas de la respuesta
+    // Remover contraseñas de la respuesta y transformar campos
     const usuariosSinPassword = usuarios?.map((u: any) => {
-      const { password, ...userWithoutPassword } = u;
-      return userWithoutPassword;
+      const { password, assigned_space_id, ...userWithoutPassword } = u;
+      return {
+        ...userWithoutPassword,
+        assignedSpaceId: assigned_space_id || undefined
+      };
     }) || [];
     
     return NextResponse.json({ data: usuariosSinPassword });
@@ -143,11 +146,15 @@ export async function POST(request: NextRequest) {
       // No lanzamos error para que el usuario se cree de todos modos
     }
     
-    // Remover password de la respuesta
-    const { password, ...usuarioSinPassword } = newUsuario;
+    // Remover password de la respuesta y transformar campos
+    const { password, assigned_space_id, ...usuarioSinPassword } = newUsuario;
+    const usuarioTransformado = {
+      ...usuarioSinPassword,
+      assignedSpaceId: assigned_space_id || undefined
+    };
     
     return NextResponse.json({ 
-      data: usuarioSinPassword,
+      data: usuarioTransformado,
       message: 'Usuario creado exitosamente. Se ha enviado un correo con las credenciales de acceso.'
     }, { status: 201 });
     

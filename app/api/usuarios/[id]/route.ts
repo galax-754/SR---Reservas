@@ -28,9 +28,13 @@ export async function GET(
       );
     }
 
-    // Excluir password de la respuesta
-    const { password: _, ...usuarioSinPassword } = usuario;
-    return NextResponse.json({ data: usuarioSinPassword });
+    // Excluir password de la respuesta y transformar campos
+    const { password, assigned_space_id, ...usuarioSinPassword } = usuario;
+    const usuarioTransformado = {
+      ...usuarioSinPassword,
+      assignedSpaceId: assigned_space_id || undefined
+    };
+    return NextResponse.json({ data: usuarioTransformado });
   } catch (error) {
     console.error('Error obteniendo usuario:', error);
     return NextResponse.json(
@@ -112,9 +116,13 @@ export async function PUT(
       );
     }
     
-    // Excluir password de la respuesta
-    const { password: _, ...usuarioSinPassword } = updatedUsuario;
-    return NextResponse.json({ data: usuarioSinPassword });
+    // Excluir password de la respuesta y transformar campos
+    const { password, assigned_space_id, ...usuarioSinPassword } = updatedUsuario;
+    const usuarioTransformado = {
+      ...usuarioSinPassword,
+      assignedSpaceId: assigned_space_id || undefined
+    };
+    return NextResponse.json({ data: usuarioTransformado });
   } catch (error) {
     console.error('Error actualizando usuario:', error);
     return NextResponse.json(

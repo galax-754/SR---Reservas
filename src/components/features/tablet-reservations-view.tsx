@@ -46,7 +46,7 @@ export function TabletReservationsView() {
       const assignedSpace = spaces.find(s => s.id === user?.assignedSpaceId)
       setSpace(assignedSpace || null)
     } catch (error) {
-      console.error('Error cargando espacio:', error)
+      console.error('❌ Error cargando espacio:', error)
     } finally {
       setIsLoading(false)
     }

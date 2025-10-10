@@ -90,6 +90,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
         updatedAt: data.user.updatedAt,
       }
 
+      console.log('🔍 AuthContext - Usuario cargado:', {
+        nombre: authUser.nombre,
+        rol: authUser.rol,
+        assignedSpaceId: authUser.assignedSpaceId
+      })
+
       setUser(authUser)
       setPermissions(getRolePermissions(mappedRole, authUser.assignedSpaceId))
       localStorage.setItem('authUser', JSON.stringify(authUser))

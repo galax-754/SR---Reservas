@@ -16,6 +16,13 @@ export function TabletReservationsView() {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [lastUpdate, setLastUpdate] = useState(new Date())
 
+  // Debug logging
+  useEffect(() => {
+    console.log('🔍 TabletReservationsView - Usuario:', user)
+    console.log('🔍 TabletReservationsView - Rol:', user?.rol)
+    console.log('🔍 TabletReservationsView - assignedSpaceId:', user?.assignedSpaceId)
+  }, [user])
+
   // Actualizar la hora cada minuto
   useEffect(() => {
     const timer = setInterval(() => {
@@ -26,7 +33,11 @@ export function TabletReservationsView() {
   }, [])
 
   useEffect(() => {
+    console.log('🔍 useEffect - user?.assignedSpaceId:', user?.assignedSpaceId)
+    console.log('🔍 useEffect - user existe:', !!user)
+    
     if (user?.assignedSpaceId) {
+      console.log('✅ Cargando datos del espacio...')
       loadSpaceData()
       checkCurrentReservation()
       
@@ -37,6 +48,9 @@ export function TabletReservationsView() {
       }, 60000)
 
       return () => clearInterval(interval)
+    } else {
+      console.log('❌ No hay assignedSpaceId, no se cargan datos')
+      setIsLoading(false)
     }
   }, [user?.assignedSpaceId])
 

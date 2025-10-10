@@ -1,11 +1,31 @@
 import { NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 
 // GET /api/roles - Obtener todos los roles
 export async function GET() {
   try {
-    const roles = await database.getAll('roles');
-    return NextResponse.json({ data: roles });
+    // Verificar que supabaseAdmin esté disponible
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: roles, error } = await supabaseAdmin
+      .from('roles')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error obteniendo roles:', error);
+      return NextResponse.json(
+        { error: 'Error obteniendo roles de la base de datos' },
+        { status: 500 }
+      );
+    }
+    
+    return NextResponse.json({ data: roles || [] });
   } catch (error) {
     console.error('Error obteniendo roles:', error);
     return NextResponse.json(

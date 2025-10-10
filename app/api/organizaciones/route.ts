@@ -26,7 +26,24 @@ export async function GET() {
       );
     }
     
-    return NextResponse.json({ data: organizaciones || [] });
+    // Transformar datos de Supabase al formato esperado por el frontend
+    const organizacionesTransformadas = (organizaciones || []).map((org: any) => ({
+      id: org.id,
+      nombre: org.name,
+      tipo: 'Interna', // Valor por defecto, ajustar según tu lógica
+      estado: org.active ? 'Activa' : 'Inactiva',
+      descripcion: org.description || '',
+      contacto: '',
+      telefono: '',
+      correo: '',
+      tieneLimiteHoras: false,
+      limiteHorasMensuales: 0,
+      horasUsadas: 0,
+      createdAt: org.created_at,
+      updatedAt: org.updated_at
+    }));
+    
+    return NextResponse.json({ data: organizacionesTransformadas });
   } catch (error) {
     console.error('Error obteniendo organizaciones:', error);
     return NextResponse.json(

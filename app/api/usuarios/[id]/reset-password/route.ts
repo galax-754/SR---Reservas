@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs/promises';
-import path from 'path';
-import bcrypt from 'bcrypt';
+import { supabaseAdmin } from '@/lib/supabase/server';
+import { authService } from '@/services/auth';
 import { emailService } from '@/services/email';
-
-const USUARIOS_FILE = path.join(process.cwd(), 'bd', 'usuarios.json');
 
 /**
  * POST /api/usuarios/[id]/reset-password
@@ -15,6 +12,13 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const userId = params.id;
     
     if (!userId) {
@@ -24,50 +28,45 @@ export async function POST(
       );
     }
 
-    // Leer usuarios actuales
-    const usuariosData = await fs.readFile(USUARIOS_FILE, 'utf-8');
-    const usuarios = JSON.parse(usuariosData);
-
     // Buscar el usuario
-    const usuarioIndex = usuarios.findIndex((u: any) => u.id === userId);
+    const { data: usuario, error: getError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', userId)
+      .single();
     
-    if (usuarioIndex === -1) {
+    if (getError || !usuario) {
       return NextResponse.json(
         { error: 'Usuario no encontrado' },
         { status: 404 }
       );
     }
 
-    const usuario = usuarios[usuarioIndex];
-
-    // Generar contraseña temporal (8 caracteres alfanuméricos)
-    const generateTemporaryPassword = (): string => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let result = '';
-      for (let i = 0; i < 8; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    };
-
-    const temporaryPassword = generateTemporaryPassword();
+    // Generar contraseña temporal
+    const temporaryPassword = authService.generateTemporaryPassword();
     
     // Encriptar la contraseña temporal
-    const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+    const hashedPassword = await authService.hashPassword(temporaryPassword);
 
     // Actualizar usuario
-    const updatedUsuario = {
-      ...usuario,
-      password: hashedPassword,
-      temporaryPassword: true,
-      lastPasswordChange: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    const { data: updatedUsuario, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({
+        password: hashedPassword,
+        temporary_password: true,
+        last_password_change: new Date().toISOString()
+      })
+      .eq('id', userId)
+      .select()
+      .single();
 
-    usuarios[usuarioIndex] = updatedUsuario;
-
-    // Guardar usuarios actualizados
-    await fs.writeFile(USUARIOS_FILE, JSON.stringify(usuarios, null, 2));
+    if (updateError) {
+      console.error('Error actualizando contraseña:', updateError);
+      return NextResponse.json(
+        { error: 'Error reseteando contraseña en la base de datos' },
+        { status: 500 }
+      );
+    }
 
     // Enviar email con contraseña temporal
     try {
@@ -84,7 +83,7 @@ export async function POST(
       // No fallar la operación si el email falla
     }
 
-    // Remover la contraseña temporal de la respuesta
+    // Remover la contraseña de la respuesta
     const { password, ...usuarioResponse } = updatedUsuario;
 
     return NextResponse.json({

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { UpdateUsuarioData } from '@/types/user-management';
 
 // GET /api/usuarios/[id] - Obtener un usuario por ID
@@ -8,16 +8,29 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const usuario = await database.getById('usuarios', params.id);
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: usuario, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', params.id)
+      .single();
     
-    if (!usuario) {
+    if (error || !usuario) {
       return NextResponse.json(
         { error: 'Usuario no encontrado' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ data: usuario });
+    // Excluir password de la respuesta
+    const { password: _, ...usuarioSinPassword } = usuario;
+    return NextResponse.json({ data: usuarioSinPassword });
   } catch (error) {
     console.error('Error obteniendo usuario:', error);
     return NextResponse.json(
@@ -33,6 +46,13 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const usuarioData: UpdateUsuarioData = await request.json();
     
     // Validación de seguridad: No permitir asignación de Super Administrador
@@ -54,12 +74,13 @@ export async function PUT(
       }
       
       // Verificar si el correo ya existe en otro usuario
-      const usuariosExistentes = await database.getAll('usuarios');
-      const correoExiste = usuariosExistentes.some(
-        (u: any) => u.correo.toLowerCase() === usuarioData.correo.toLowerCase() && u.id !== params.id
-      );
+      const { data: usuariosExistentes } = await supabaseAdmin
+        .from('users')
+        .select('id, correo')
+        .neq('id', params.id)
+        .ilike('correo', usuarioData.correo);
       
-      if (correoExiste) {
+      if (usuariosExistentes && usuariosExistentes.length > 0) {
         return NextResponse.json(
           { error: 'Ya existe otro usuario con este correo electrónico' },
           { status: 409 }
@@ -67,8 +88,33 @@ export async function PUT(
       }
     }
     
-    const updatedUsuario = await database.update('usuarios', params.id, usuarioData);
-    return NextResponse.json({ data: updatedUsuario });
+    // Preparar datos para actualización
+    const updateData: any = {};
+    if (usuarioData.nombre) updateData.nombre = usuarioData.nombre;
+    if (usuarioData.correo) updateData.correo = usuarioData.correo.toLowerCase();
+    if (usuarioData.organizacion) updateData.organizacion = usuarioData.organizacion;
+    if (usuarioData.rol) updateData.rol = usuarioData.rol;
+    if (usuarioData.estado) updateData.estado = usuarioData.estado;
+    if (usuarioData.assignedSpaceId !== undefined) updateData.assigned_space_id = usuarioData.assignedSpaceId;
+    
+    const { data: updatedUsuario, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update(updateData)
+      .eq('id', params.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      console.error('Error actualizando usuario:', updateError);
+      return NextResponse.json(
+        { error: 'Error actualizando usuario en la base de datos' },
+        { status: 500 }
+      );
+    }
+    
+    // Excluir password de la respuesta
+    const { password: _, ...usuarioSinPassword } = updatedUsuario;
+    return NextResponse.json({ data: usuarioSinPassword });
   } catch (error) {
     console.error('Error actualizando usuario:', error);
     return NextResponse.json(
@@ -84,7 +130,41 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await database.delete('usuarios', params.id);
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    // Verificar que el usuario existe
+    const { data: usuario, error: getError } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    
+    if (getError || !usuario) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+    
+    // Eliminar el usuario
+    const { error: deleteError } = await supabaseAdmin
+      .from('users')
+      .delete()
+      .eq('id', params.id);
+
+    if (deleteError) {
+      console.error('Error eliminando usuario:', deleteError);
+      return NextResponse.json(
+        { error: 'Error eliminando usuario de la base de datos' },
+        { status: 500 }
+      );
+    }
+    
     return NextResponse.json({ message: 'Usuario eliminado exitosamente' });
   } catch (error) {
     console.error('Error eliminando usuario:', error);
@@ -101,8 +181,31 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    const updatedUsuario = await database.update('usuarios', params.id, { estado: 'Inactivo' });
-    return NextResponse.json({ data: updatedUsuario });
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: updatedUsuario, error: updateError } = await supabaseAdmin
+      .from('users')
+      .update({ estado: 'Inactivo' })
+      .eq('id', params.id)
+      .select()
+      .single();
+    
+    if (updateError) {
+      console.error('Error desactivando usuario:', updateError);
+      return NextResponse.json(
+        { error: 'Error desactivando usuario en la base de datos' },
+        { status: 500 }
+      );
+    }
+    
+    // Excluir password de la respuesta
+    const { password: _, ...usuarioSinPassword } = updatedUsuario;
+    return NextResponse.json({ data: usuarioSinPassword });
   } catch (error) {
     console.error('Error desactivando usuario:', error);
     return NextResponse.json(

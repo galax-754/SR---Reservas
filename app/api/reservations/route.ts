@@ -48,7 +48,24 @@ export async function GET(request: NextRequest) {
     
     let query = supabaseAdmin
       .from('reservations')
-      .select('*')
+      .select(`
+        *,
+        spaces:space_id (
+          id,
+          name,
+          capacity,
+          description,
+          equipment,
+          tags,
+          image_url,
+          active
+        ),
+        users:user_id (
+          id,
+          nombre,
+          correo
+        )
+      `)
       .order('created_at', { ascending: false });
     
     // Aplicar filtros
@@ -78,9 +95,9 @@ export async function GET(request: NextRequest) {
     
     console.log('📋 Reservas obtenidas:', reservations?.length || 0);
     
-    // Transformar datos al formato esperado por el frontend (versión simplificada)
+    // Transformar datos al formato esperado por el frontend
     if (reservations && reservations.length > 0) {
-      const transformedReservations = reservations.map(reservation => {
+      const transformedReservations = reservations.map((reservation: any) => {
         // Extraer fecha y hora de start_time y end_time
         const startDate = new Date(reservation.start_time);
         const endDate = new Date(reservation.end_time);
@@ -89,27 +106,31 @@ export async function GET(request: NextRequest) {
         const startTime = startDate.toTimeString().substring(0, 5);
         const endTime = endDate.toTimeString().substring(0, 5);
         
+        // Obtener datos del espacio y usuario del JOIN
+        const spaceData = reservation.spaces || {};
+        const userData = reservation.users || {};
+        
         return {
           id: reservation.id,
           title: reservation.title || 'Reserva',
-          coordinatorName: 'Usuario', // Valor por defecto
-          coordinatorEmail: '',
+          coordinatorName: userData.nombre || 'Usuario',
+          coordinatorEmail: userData.correo || '',
           coordinatorPhone: '',
           company: reservation.organization || 'Sin organización',
           numberOfPeople: reservation.attendees || 1,
           space: {
-            id: reservation.space_id,
-            name: 'Espacio',
+            id: spaceData.id || reservation.space_id,
+            name: spaceData.name || 'Espacio',
             type: 'meeting-room',
-            capacity: 10,
+            capacity: spaceData.capacity || 10,
             location: '',
-            amenities: [],
+            amenities: spaceData.equipment || [],
             setupTypes: [],
-            isActive: true,
+            isActive: spaceData.active !== undefined ? spaceData.active : true,
             requiresCatering: false,
-            tags: [],
-            backgroundImage: '',
-            description: '',
+            tags: spaceData.tags || [],
+            backgroundImage: spaceData.image_url || '',
+            description: spaceData.description || '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           },

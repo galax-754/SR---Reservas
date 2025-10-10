@@ -128,16 +128,20 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Enviar email de bienvenida (asíncrono, no bloquea)
-    emailService.sendWelcomeEmail(
-      newUsuario.correo,
-      newUsuario.nombre,
-      temporaryPassword,
-      newUsuario.rol
-    ).catch(err => {
-      console.error('Error enviando email de bienvenida:', err);
+    // Enviar email de bienvenida
+    try {
+      await emailService.sendWelcomeEmail(
+        newUsuario.correo,
+        newUsuario.nombre,
+        temporaryPassword,
+        newUsuario.rol
+      );
+      console.log(`✅ Email de bienvenida enviado exitosamente a ${newUsuario.correo}`);
+    } catch (emailError) {
+      console.error('❌ Error enviando email de bienvenida:', emailError);
+      console.error('❌ Detalles del error:', JSON.stringify(emailError, null, 2));
       // No lanzamos error para que el usuario se cree de todos modos
-    });
+    }
     
     // Remover password de la respuesta
     const { password, ...usuarioSinPassword } = newUsuario;

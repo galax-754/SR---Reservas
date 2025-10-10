@@ -35,13 +35,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const transformedSpace = {
       id: space.id,
       name: space.name,
-      type: 'meeting-room', // Valor por defecto
+      type: space.type || 'meeting-room',
       capacity: space.capacity,
-      location: '', // Valor por defecto
+      location: space.location || '',
       amenities: space.equipment || [],
-      setupTypes: [], // Valor por defecto
+      setupTypes: space.setup_types || [],
       isActive: space.active,
-      requiresCatering: false, // Valor por defecto
+      requiresCatering: space.requires_catering || false,
+      requiresGuestList: space.requires_guest_list || false,
+      availableHours: space.available_hours || null,
       tags: space.tags || [],
       backgroundImage: space.image_url || '',
       description: space.description || '',
@@ -75,9 +77,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const updateData: any = {};
     
     if (spaceData.name) updateData.name = spaceData.name;
+    if (spaceData.type) updateData.type = spaceData.type;
     if (spaceData.capacity) updateData.capacity = spaceData.capacity;
+    if (spaceData.location !== undefined) updateData.location = spaceData.location;
     if (spaceData.description) updateData.description = spaceData.description;
     if (spaceData.amenities) updateData.equipment = spaceData.amenities;
+    if (spaceData.setupTypes) updateData.setup_types = spaceData.setupTypes;
+    if (spaceData.requiresCatering !== undefined) updateData.requires_catering = spaceData.requiresCatering;
+    if (spaceData.requiresGuestList !== undefined) updateData.requires_guest_list = spaceData.requiresGuestList;
+    if (spaceData.availableHours) updateData.available_hours = spaceData.availableHours;
     if (spaceData.tags) updateData.tags = spaceData.tags;
     if (spaceData.backgroundImage) updateData.image_url = spaceData.backgroundImage;
     if (spaceData.isActive !== undefined) updateData.active = spaceData.isActive;
@@ -102,13 +110,15 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const transformedSpace = {
       id: updatedSpace.id,
       name: updatedSpace.name,
-      type: 'meeting-room',
+      type: updatedSpace.type || 'meeting-room',
       capacity: updatedSpace.capacity,
-      location: '',
+      location: updatedSpace.location || '',
       amenities: updatedSpace.equipment || [],
-      setupTypes: [],
+      setupTypes: updatedSpace.setup_types || [],
       isActive: updatedSpace.active,
-      requiresCatering: false,
+      requiresCatering: updatedSpace.requires_catering || false,
+      requiresGuestList: updatedSpace.requires_guest_list || false,
+      availableHours: updatedSpace.available_hours || null,
       tags: updatedSpace.tags || [],
       backgroundImage: updatedSpace.image_url || '',
       description: updatedSpace.description || '',

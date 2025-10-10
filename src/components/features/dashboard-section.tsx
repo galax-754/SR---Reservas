@@ -1523,6 +1523,7 @@ export function DashboardSection() {
   const [showTagForm, setShowTagForm] = useState(false)
   const [showSpaceDetails, setShowSpaceDetails] = useState(false)
   const [selectedSpace, setSelectedSpace] = useState<Space | null>(null)
+  const [spaceDetailsReadOnly, setSpaceDetailsReadOnly] = useState(false)
   const [editingSpaceId, setEditingSpaceId] = useState<string | null>(null)
   const [editingTagId, setEditingTagId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -1577,6 +1578,11 @@ export function DashboardSection() {
     setupTypes: [],
     isActive: true,
     requiresCatering: false,
+    requiresGuestList: false,
+    availableHours: {
+      start: '08:00',
+      end: '18:00'
+    },
     tags: [],
     backgroundImage: '',
     description: ''
@@ -2083,6 +2089,11 @@ export function DashboardSection() {
       setupTypes: [],
       isActive: true,
       requiresCatering: false,
+      requiresGuestList: false,
+      availableHours: {
+        start: '08:00',
+        end: '18:00'
+      },
       tags: [],
       backgroundImage: '',
       description: ''
@@ -2101,6 +2112,11 @@ export function DashboardSection() {
       setupTypes: space.setupTypes,
       isActive: space.isActive,
       requiresCatering: space.requiresCatering,
+      requiresGuestList: space.requiresGuestList,
+      availableHours: space.availableHours || {
+        start: '08:00',
+        end: '18:00'
+      },
       tags: space.tags,
       backgroundImage: space.backgroundImage || '',
       description: space.description || ''
@@ -2108,8 +2124,9 @@ export function DashboardSection() {
     setShowSpaceForm(true)
   }
 
-  const handleViewSpaceDetails = (space: Space) => {
+  const handleViewSpaceDetails = (space: Space, readOnly: boolean = false) => {
     setSelectedSpace(space)
+    setSpaceDetailsReadOnly(readOnly)
     setShowSpaceDetails(true)
   }
 
@@ -3282,14 +3299,84 @@ export function DashboardSection() {
           </div>
         )}
 
-        {/* Vista Map */}
+        {/* Vista de Espacios - Solo lectura */}
         {viewMode === 'map' && (
-          <div className="bg-white rounded-lg shadow-sm border p-12">
-            <div className="text-center">
-              <Map className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Vista de Mapa</h3>
-              <p className="text-gray-500">Vista de mapa de espacios (Implementación pendiente)</p>
+          <div className="bg-white rounded-lg shadow-sm border p-6">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-900">Espacios Disponibles</h2>
+              <p className="text-gray-600 mt-1">
+                <Info className="inline w-4 h-4 mr-1" />
+                Haz clic en un espacio para ver sus detalles y especificaciones
+              </p>
             </div>
+
+            {isLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                  <p className="text-gray-600">Cargando espacios...</p>
+                </div>
+              </div>
+            ) : spaces.length === 0 ? (
+              <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                <Building className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No hay espacios disponibles</h3>
+                <p className="text-gray-500">Aún no se han creado espacios para reservar</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {spaces
+                  .filter(space => space.isActive)
+                  .map((space) => (
+                    <div
+                      key={space.id}
+                      className="group bg-white rounded-lg shadow-md border-2 border-gray-200 hover:border-blue-500 hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer relative"
+                      onClick={() => handleViewSpaceDetails(space, true)}
+                    >
+                      {/* Imagen del espacio */}
+                      <div className="relative h-64 bg-gradient-to-br from-blue-500 to-purple-600 overflow-hidden">
+                        {space.backgroundImage ? (
+                          <img
+                            src={space.backgroundImage}
+                            alt={space.name}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Building className="w-20 h-20 text-white/80" />
+                          </div>
+                        )}
+                        
+                        {/* Overlay oscuro */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                        
+                        {/* Nombre del espacio */}
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                          <h3 className="text-xl font-bold text-white drop-shadow-lg mb-1">
+                            {space.name}
+                          </h3>
+                          <div className="flex items-center space-x-2 text-white/90 text-sm">
+                            <Users className="w-4 h-4" />
+                            <span>{space.capacity} personas</span>
+                            {space.location && (
+                              <>
+                                <span>•</span>
+                                <MapPin className="w-4 h-4" />
+                                <span>{space.location}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Indicador de click */}
+                        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm rounded-full p-2 group-hover:bg-blue-500 group-hover:scale-110 transition-all duration-300">
+                          <Info className="w-5 h-5 text-blue-600 group-hover:text-white" />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -3993,8 +4080,56 @@ export function DashboardSection() {
                     onChange={(e) => setNewSpace(prev => ({ ...prev, requiresCatering: e.target.checked }))}
                     className="rounded border-white/30 text-blue-500 focus:ring-white/50 bg-white/10"
                   />
-                  <span className="text-sm text-white">Requiere catering</span>
+                  <span className="text-sm text-white">Permite coffee break</span>
                 </label>
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={newSpace.requiresGuestList}
+                    onChange={(e) => setNewSpace(prev => ({ ...prev, requiresGuestList: e.target.checked }))}
+                    className="rounded border-white/30 text-blue-500 focus:ring-white/50 bg-white/10"
+                  />
+                  <span className="text-sm text-white">Requiere lista de invitados</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Horario Disponible */}
+            <div>
+              <h3 className="text-lg font-semibold text-white mb-4">Horario Disponible</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Hora de inicio</label>
+                  <input
+                    type="time"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-white/60 text-white"
+                    value={newSpace.availableHours?.start || '08:00'}
+                    onChange={(e) => setNewSpace(prev => ({ 
+                      ...prev, 
+                      availableHours: { 
+                        ...prev.availableHours, 
+                        start: e.target.value,
+                        end: prev.availableHours?.end || '18:00'
+                      } 
+                    }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white mb-2">Hora de fin</label>
+                  <input
+                    type="time"
+                    className="w-full px-3 py-2 bg-white/10 border border-white/30 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-white/60 text-white"
+                    value={newSpace.availableHours?.end || '18:00'}
+                    onChange={(e) => setNewSpace(prev => ({ 
+                      ...prev, 
+                      availableHours: { 
+                        start: prev.availableHours?.start || '08:00',
+                        ...prev.availableHours,
+                        end: e.target.value
+                      } 
+                    }))}
+                  />
+                </div>
               </div>
             </div>
 
@@ -4306,11 +4441,45 @@ export function DashboardSection() {
                     <X className="w-4 h-4 text-white/40" />
                   )}
                   <span className="text-sm text-white">
-                    Catering: {selectedSpace.requiresCatering ? 'Requerido' : 'No requerido'}
+                    Coffee Break: {selectedSpace.requiresCatering ? 'Permitido' : 'No permitido'}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  {selectedSpace.requiresGuestList ? (
+                    <CheckCircle className="w-4 h-4 text-green-300" />
+                  ) : (
+                    <X className="w-4 h-4 text-white/40" />
+                  )}
+                  <span className="text-sm text-white">
+                    Lista de Invitados: {selectedSpace.requiresGuestList ? 'Requerida' : 'No requerida'}
                   </span>
                 </div>
               </div>
             </div>
+
+            {/* Horario Disponible */}
+            {selectedSpace.availableHours && (
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-4">Horario Disponible</h3>
+                <div className="flex items-center space-x-4 bg-white/5 border border-white/30 rounded-lg p-4">
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-blue-300" />
+                    <div>
+                      <p className="text-sm text-white/70">Hora de inicio</p>
+                      <p className="text-lg font-semibold text-white">{selectedSpace.availableHours.start}</p>
+                    </div>
+                  </div>
+                  <div className="text-white/40">—</div>
+                  <div className="flex items-center space-x-2">
+                    <Clock className="w-5 h-5 text-blue-300" />
+                    <div>
+                      <p className="text-sm text-white/70">Hora de fin</p>
+                      <p className="text-lg font-semibold text-white">{selectedSpace.availableHours.end}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Botones de acción */}
             <div className="flex justify-end space-x-3 pt-6 border-t border-white/30">
@@ -4321,15 +4490,17 @@ export function DashboardSection() {
               >
                 Cerrar
               </Button>
-              <Button 
-                onClick={() => {
-                  setShowSpaceDetails(false)
-                  handleEditSpace(selectedSpace)
-                }}
-                className="bg-blue-500/30 hover:bg-blue-500/50 text-white border border-white/30"
-              >
-                Editar Espacio
-              </Button>
+              {!spaceDetailsReadOnly && (
+                <Button 
+                  onClick={() => {
+                    setShowSpaceDetails(false)
+                    handleEditSpace(selectedSpace)
+                  }}
+                  className="bg-blue-500/30 hover:bg-blue-500/50 text-white border border-white/30"
+                >
+                  Editar Espacio
+                </Button>
+              )}
             </div>
           </div>
         </Modal>

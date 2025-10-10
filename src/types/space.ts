@@ -47,6 +47,11 @@ export interface Space {
   setupTypes: string[];
   isActive: boolean;
   requiresCatering: boolean;
+  requiresGuestList: boolean;
+  availableHours?: {
+    start: string;
+    end: string;
+  };
   tags: string[];
   backgroundImage?: string;
   description?: string;
@@ -77,6 +82,11 @@ export interface CreateSpaceData {
   setupTypes: string[];
   isActive: boolean;
   requiresCatering: boolean;
+  requiresGuestList: boolean;
+  availableHours?: {
+    start: string;
+    end: string;
+  };
   tags: string[];
   backgroundImage?: string;
   description?: string;

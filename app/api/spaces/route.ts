@@ -30,13 +30,15 @@ export async function GET() {
     const spacesTransformados = (spaces || []).map((space: any) => ({
       id: space.id,
       name: space.name,
-      type: 'meeting-room', // Valor por defecto
+      type: space.type || 'meeting-room',
       capacity: space.capacity,
-      location: '', // Valor por defecto
+      location: space.location || '',
       amenities: space.equipment || [],
-      setupTypes: [], // Valor por defecto
+      setupTypes: space.setup_types || [],
       isActive: space.active,
-      requiresCatering: false, // Valor por defecto
+      requiresCatering: space.requires_catering || false,
+      requiresGuestList: space.requires_guest_list || false,
+      availableHours: space.available_hours || null,
       tags: space.tags || [],
       backgroundImage: space.image_url || '',
       description: space.description || '',
@@ -73,9 +75,15 @@ export async function POST(request: NextRequest) {
       .insert({
         id: crypto.randomUUID(), // Generar ID único
         name: spaceData.name,
+        type: spaceData.type || 'meeting-room',
         capacity: spaceData.capacity,
+        location: spaceData.location || '',
         description: spaceData.description || '',
         equipment: spaceData.amenities || [],
+        setup_types: spaceData.setupTypes || [],
+        requires_catering: spaceData.requiresCatering || false,
+        requires_guest_list: spaceData.requiresGuestList || false,
+        available_hours: spaceData.availableHours || null,
         tags: spaceData.tags || [],
         image_url: spaceData.backgroundImage || '',
         active: spaceData.isActive !== false
@@ -95,13 +103,15 @@ export async function POST(request: NextRequest) {
     const transformedSpace = {
       id: newSpace.id,
       name: newSpace.name,
-      type: 'meeting-room',
+      type: newSpace.type || 'meeting-room',
       capacity: newSpace.capacity,
-      location: '',
+      location: newSpace.location || '',
       amenities: newSpace.equipment || [],
-      setupTypes: [],
+      setupTypes: newSpace.setup_types || [],
       isActive: newSpace.active,
-      requiresCatering: false,
+      requiresCatering: newSpace.requires_catering || false,
+      requiresGuestList: newSpace.requires_guest_list || false,
+      availableHours: newSpace.available_hours || null,
       tags: newSpace.tags || [],
       backgroundImage: newSpace.image_url || '',
       description: newSpace.description || '',

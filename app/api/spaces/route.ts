@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
     const { data: newSpace, error } = await supabaseAdmin
       .from('spaces')
       .insert({
+        id: String(Date.now()), // Generar ID único
         name: spaceData.name,
         capacity: spaceData.capacity,
         description: spaceData.description || '',

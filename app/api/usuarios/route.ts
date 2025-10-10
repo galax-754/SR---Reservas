@@ -106,6 +106,7 @@ export async function POST(request: NextRequest) {
     const { data: newUsuario, error: createError } = await supabaseAdmin
       .from('users')
       .insert({
+        id: String(Date.now()), // Generar ID único
         nombre: usuarioData.nombre,
         correo: usuarioData.correo.toLowerCase(),
         organizacion: usuarioData.organizacion,

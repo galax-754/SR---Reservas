@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
     const { data: newOrganizacion, error } = await supabaseAdmin
       .from('organizations')
       .insert({
+        id: String(Date.now()), // Generar ID único
         name: organizacionData.nombre,
         description: organizacionData.descripcion || '',
         active: organizacionData.estado !== 'Inactiva'

@@ -53,6 +53,7 @@ export async function POST(request: NextRequest) {
     const { data: newTag, error } = await supabaseAdmin
       .from('space_tags')
       .insert({
+        id: String(Date.now()), // Generar ID único
         name: tagData.name,
         color: tagData.color || '#3B82F6'
       })

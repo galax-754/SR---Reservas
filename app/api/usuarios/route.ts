@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { authService } from '@/services/auth';
 import { emailService } from '@/services/email';
 import { CreateUsuarioData } from '@/types/user-management';
@@ -7,13 +7,24 @@ import { CreateUsuarioData } from '@/types/user-management';
 // GET /api/usuarios - Obtener todos los usuarios
 export async function GET() {
   try {
-    const usuarios = await database.getAll('usuarios');
+    const { data: usuarios, error } = await supabaseAdmin
+      .from('users')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Error obteniendo usuarios:', error);
+      return NextResponse.json(
+        { error: 'Error obteniendo usuarios de la base de datos' },
+        { status: 500 }
+      );
+    }
     
     // Remover contraseñas de la respuesta
-    const usuariosSinPassword = usuarios.map((u: any) => {
+    const usuariosSinPassword = usuarios?.map((u: any) => {
       const { password, ...userWithoutPassword } = u;
       return userWithoutPassword;
-    });
+    }) || [];
     
     return NextResponse.json({ data: usuariosSinPassword });
   } catch (error) {
@@ -48,12 +59,13 @@ export async function POST(request: NextRequest) {
     }
     
     // Verificar si el correo ya existe
-    const usuariosExistentes = await database.getAll('usuarios');
-    const correoExiste = usuariosExistentes.some(
-      (u: any) => u.correo.toLowerCase() === usuarioData.correo.toLowerCase()
-    );
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('correo', usuarioData.correo.toLowerCase())
+      .single();
     
-    if (correoExiste) {
+    if (existingUser) {
       return NextResponse.json(
         { error: 'Ya existe un usuario con este correo electrónico' },
         { status: 409 }
@@ -75,13 +87,29 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await authService.hashPassword(temporaryPassword);
     
     // Crear usuario con contraseña hasheada
-    const newUsuario = await database.create('usuarios', {
-      ...usuarioData,
-      password: hashedPassword,
-      temporaryPassword: true,
-      estado: 'Activo', // Activar inmediatamente al crear
-      lastPasswordChange: new Date().toISOString()
-    });
+    const { data: newUsuario, error: createError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        nombre: usuarioData.nombre,
+        correo: usuarioData.correo.toLowerCase(),
+        organizacion: usuarioData.organizacion,
+        rol: usuarioData.rol,
+        password: hashedPassword,
+        temporary_password: true,
+        estado: 'Activo',
+        assigned_space_id: usuarioData.assignedSpaceId || null,
+        last_password_change: new Date().toISOString()
+      })
+      .select()
+      .single();
+    
+    if (createError) {
+      console.error('Error creando usuario:', createError);
+      return NextResponse.json(
+        { error: 'Error creando usuario en la base de datos' },
+        { status: 500 }
+      );
+    }
     
     // Enviar email de bienvenida (asíncrono, no bloquea)
     emailService.sendWelcomeEmail(

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { database } from '@/services/database';
+import { supabaseAdmin } from '@/lib/supabase/server';
 import { CreateReservationData } from '@/services/reservationsAPI';
 
 interface RouteParams {
@@ -11,16 +11,66 @@ interface RouteParams {
 // GET /api/reservations/[id] - Obtener reserva por ID
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const reservation = await database.getById('reservations', params.id);
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
+    const { data: reservation, error } = await supabaseAdmin
+      .from('reservations')
+      .select('*')
+      .eq('id', params.id)
+      .single();
     
-    if (!reservation) {
+    if (error || !reservation) {
       return NextResponse.json(
         { error: 'Reserva no encontrada' },
         { status: 404 }
       );
     }
     
-    return NextResponse.json({ data: reservation });
+    // Transformar al formato esperado por el frontend
+    const startDate = new Date(reservation.start_time);
+    const endDate = new Date(reservation.end_time);
+    
+    const transformedReservation = {
+      id: reservation.id,
+      title: reservation.title || 'Reserva',
+      coordinatorName: 'Usuario',
+      coordinatorEmail: '',
+      coordinatorPhone: '',
+      company: reservation.organization || 'Sin organización',
+      numberOfPeople: reservation.attendees || 1,
+      space: {
+        id: reservation.space_id,
+        name: 'Espacio',
+        type: 'meeting-room',
+        capacity: 10,
+        location: '',
+        amenities: [],
+        setupTypes: [],
+        isActive: true,
+        requiresCatering: false,
+        tags: [],
+        backgroundImage: '',
+        description: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      date: startDate.toISOString().split('T')[0],
+      startTime: startDate.toTimeString().substring(0, 5),
+      endTime: endDate.toTimeString().substring(0, 5),
+      meetingType: 'presencial' as const,
+      coffeeBreak: 'no' as const,
+      notes: reservation.description || '',
+      status: reservation.status || 'confirmed',
+      createdAt: reservation.created_at,
+      updatedAt: reservation.updated_at
+    };
+    
+    return NextResponse.json({ data: transformedReservation });
   } catch (error) {
     console.error('Error obteniendo reserva:', error);
     return NextResponse.json(
@@ -33,13 +83,25 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 // PUT /api/reservations/[id] - Actualizar reserva
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     const reservationData: Partial<CreateReservationData & { status?: string }> = await request.json();
     console.log('📝 Datos recibidos para actualizar reserva ID:', params.id);
     console.log('📝 Datos:', JSON.stringify(reservationData, null, 2));
     
     // Obtener la reserva actual
-    const currentReservation = await database.getById('reservations', params.id);
-    if (!currentReservation) {
+    const { data: currentReservation, error: getError } = await supabaseAdmin
+      .from('reservations')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    
+    if (getError || !currentReservation) {
       return NextResponse.json(
         { error: 'Reserva no encontrada' },
         { status: 404 }
@@ -47,73 +109,85 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
     console.log('📖 Reserva actual:', JSON.stringify(currentReservation, null, 2));
     
-    // Si hay cambios en la duración o se cancela, actualizar horas de la organización
-    if (currentReservation.company) {
-      const organizaciones = await database.getAll('organizaciones');
-      const organizacion = organizaciones.find((org: any) => org.nombre === currentReservation.company);
+    // Preparar datos para actualización
+    const updateData: any = {};
+    
+    if (reservationData.title) updateData.title = reservationData.title;
+    if (reservationData.notes) updateData.description = reservationData.notes;
+    if (reservationData.status) updateData.status = reservationData.status;
+    if (reservationData.numberOfPeople) updateData.attendees = reservationData.numberOfPeople;
+    if (reservationData.company) updateData.organization = reservationData.company;
+    
+    // Si hay cambios en fecha/hora, actualizar start_time y end_time
+    if (reservationData.date || reservationData.startTime || reservationData.endTime) {
+      const date = reservationData.date || currentReservation.start_time.split('T')[0];
+      const startTime = reservationData.startTime || new Date(currentReservation.start_time).toTimeString().substring(0, 5);
+      const endTime = reservationData.endTime || new Date(currentReservation.end_time).toTimeString().substring(0, 5);
       
-      if (organizacion && organizacion.tieneLimiteHoras) {
-        // Calcular duración actual
-        const currentStartTime = currentReservation.startTime.split(':');
-        const currentEndTime = currentReservation.endTime.split(':');
-        const currentStartMinutes = parseInt(currentStartTime[0]) * 60 + parseInt(currentStartTime[1]);
-        const currentEndMinutes = parseInt(currentEndTime[0]) * 60 + parseInt(currentEndTime[1]);
-        const currentDurationHours = (currentEndMinutes - currentStartMinutes) / 60;
-        
-        let horasUsadas = organizacion.horasUsadas || 0;
-        
-        // Si se está cancelando, devolver las horas
-        if (reservationData.status === 'cancelled' && currentReservation.status !== 'cancelled') {
-          horasUsadas = Math.max(0, horasUsadas - currentDurationHours);
-          await database.update('organizaciones', organizacion.id, {
-            horasUsadas,
-            updatedAt: new Date().toISOString()
-          });
-        }
-        // Si hay cambios en la duración
-        else if (reservationData.startTime || reservationData.endTime) {
-          const newStartTime = reservationData.startTime || currentReservation.startTime;
-          const newEndTime = reservationData.endTime || currentReservation.endTime;
-          
-          const newStartMinutes = parseInt(newStartTime.split(':')[0]) * 60 + parseInt(newStartTime.split(':')[1]);
-          const newEndMinutes = parseInt(newEndTime.split(':')[0]) * 60 + parseInt(newEndTime.split(':')[1]);
-          const newDurationHours = (newEndMinutes - newStartMinutes) / 60;
-          
-          // Calcular diferencia
-          const diferencia = newDurationHours - currentDurationHours;
-          const nuevasHorasUsadas = horasUsadas + diferencia;
-          const limiteHoras = organizacion.limiteHoras || 0;
-          
-          // Verificar que no exceda el límite
-          if (nuevasHorasUsadas > limiteHoras) {
-            return NextResponse.json(
-              { 
-                error: `La actualización excedería el límite de horas de la organización "${organizacion.nombre}". Límite: ${limiteHoras}h, Horas que tendrías usadas: ${nuevasHorasUsadas}h` 
-              },
-              { status: 400 }
-            );
-          }
-          
-          await database.update('organizaciones', organizacion.id, {
-            horasUsadas: nuevasHorasUsadas,
-            updatedAt: new Date().toISOString()
-          });
-        }
-      }
+      updateData.start_time = `${date}T${startTime}:00.000Z`;
+      updateData.end_time = `${date}T${endTime}:00.000Z`;
     }
     
-    const updatedReservation = await database.update('reservations', params.id, reservationData);
-    console.log('✅ Reserva actualizada en la base de datos:', JSON.stringify(updatedReservation, null, 2));
-    return NextResponse.json({ data: updatedReservation });
-  } catch (error) {
-    console.error('Error actualizando reserva:', error);
+    // Actualizar la reserva en Supabase
+    const { data: updatedReservation, error: updateError } = await supabaseAdmin
+      .from('reservations')
+      .update(updateData)
+      .eq('id', params.id)
+      .select()
+      .single();
     
-    if (error instanceof Error && error.message.includes('no encontrado')) {
+    if (updateError) {
+      console.error('Error actualizando reserva:', updateError);
       return NextResponse.json(
-        { error: 'Reserva no encontrada' },
-        { status: 404 }
+        { error: 'Error actualizando reserva en la base de datos' },
+        { status: 500 }
       );
     }
+    
+    console.log('✅ Reserva actualizada en la base de datos:', JSON.stringify(updatedReservation, null, 2));
+    
+    // Transformar la respuesta al formato esperado por el frontend
+    const startDate = new Date(updatedReservation.start_time);
+    const endDate = new Date(updatedReservation.end_time);
+    
+    const transformedReservation = {
+      id: updatedReservation.id,
+      title: updatedReservation.title || 'Reserva',
+      coordinatorName: 'Usuario',
+      coordinatorEmail: '',
+      coordinatorPhone: '',
+      company: updatedReservation.organization || 'Sin organización',
+      numberOfPeople: updatedReservation.attendees || 1,
+      space: {
+        id: updatedReservation.space_id,
+        name: 'Espacio',
+        type: 'meeting-room',
+        capacity: 10,
+        location: '',
+        amenities: [],
+        setupTypes: [],
+        isActive: true,
+        requiresCatering: false,
+        tags: [],
+        backgroundImage: '',
+        description: '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      },
+      date: startDate.toISOString().split('T')[0],
+      startTime: startDate.toTimeString().substring(0, 5),
+      endTime: endDate.toTimeString().substring(0, 5),
+      meetingType: 'presencial' as const,
+      coffeeBreak: 'no' as const,
+      notes: updatedReservation.description || '',
+      status: updatedReservation.status || 'confirmed',
+      createdAt: updatedReservation.created_at,
+      updatedAt: updatedReservation.updated_at
+    };
+    
+    return NextResponse.json({ data: transformedReservation });
+  } catch (error) {
+    console.error('Error actualizando reserva:', error);
     
     return NextResponse.json(
       { error: 'Error interno del servidor' },
@@ -125,50 +199,44 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 // DELETE /api/reservations/[id] - Eliminar reserva
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
+    if (!supabaseAdmin) {
+      return NextResponse.json(
+        { error: 'Base de datos no configurada correctamente' },
+        { status: 500 }
+      );
+    }
+
     // Obtener la reserva antes de eliminarla
-    const reservation = await database.getById('reservations', params.id);
-    if (!reservation) {
+    const { data: reservation, error: getError } = await supabaseAdmin
+      .from('reservations')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    
+    if (getError || !reservation) {
       return NextResponse.json(
         { error: 'Reserva no encontrada' },
         { status: 404 }
       );
     }
     
-    // Si la reserva no está cancelada, devolver las horas a la organización
-    if (reservation.company && reservation.status !== 'cancelled') {
-      const organizaciones = await database.getAll('organizaciones');
-      const organizacion = organizaciones.find((org: any) => org.nombre === reservation.company);
-      
-      if (organizacion && organizacion.tieneLimiteHoras) {
-        // Calcular duración de la reserva
-        const startTime = reservation.startTime.split(':');
-        const endTime = reservation.endTime.split(':');
-        const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
-        const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
-        const durationHours = (endMinutes - startMinutes) / 60;
-        
-        const horasUsadas = organizacion.horasUsadas || 0;
-        const nuevasHorasUsadas = Math.max(0, horasUsadas - durationHours);
-        
-        // Actualizar las horas usadas
-        await database.update('organizaciones', organizacion.id, {
-          horasUsadas: nuevasHorasUsadas,
-          updatedAt: new Date().toISOString()
-        });
-      }
+    // Eliminar la reserva de Supabase
+    const { error: deleteError } = await supabaseAdmin
+      .from('reservations')
+      .delete()
+      .eq('id', params.id);
+
+    if (deleteError) {
+      console.error('Error eliminando reserva:', deleteError);
+      return NextResponse.json(
+        { error: 'Error eliminando reserva de la base de datos' },
+        { status: 500 }
+      );
     }
     
-    await database.delete('reservations', params.id);
     return NextResponse.json({ message: 'Reserva eliminada correctamente' });
   } catch (error) {
     console.error('Error eliminando reserva:', error);
-    
-    if (error instanceof Error && error.message.includes('no encontrado')) {
-      return NextResponse.json(
-        { error: 'Reserva no encontrada' },
-        { status: 404 }
-      );
-    }
     
     return NextResponse.json(
       { error: 'Error interno del servidor' },

@@ -314,6 +314,8 @@ export function ReservationForm({
         r.space?.id === spaceId && 
         r.date === date &&
         r.status !== 'cancelled' &&
+        r.startTime && // Asegurar que tenga startTime
+        r.endTime && // Asegurar que tenga endTime
         (!editingReservation || r.id !== editingReservation.id)
       );
       
@@ -351,6 +353,9 @@ export function ReservationForm({
     const proposedEndMin = timeToMinutes(proposedEnd);
 
     for (const reservation of existingReservations) {
+      // Validar que la reserva tenga los campos necesarios
+      if (!reservation.startTime || !reservation.endTime) continue;
+      
       const existingStartMin = timeToMinutes(reservation.startTime);
       const existingEndMin = timeToMinutes(reservation.endTime);
 

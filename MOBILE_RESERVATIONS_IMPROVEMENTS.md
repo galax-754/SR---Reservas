@@ -123,3 +123,4 @@ La sección "Mis reservas" ahora es completamente usable en móviles con:
 - ⚡ Performance optimizado
 
 
+

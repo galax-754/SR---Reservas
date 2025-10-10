@@ -220,3 +220,4 @@ Si necesitas exactamente 1480px, se puede crear un breakpoint custom en `tailwin
 ¡El cambio ha sido implementado exitosamente! 🎉
 
 
+

@@ -162,3 +162,4 @@ El proyecto ahora ofrece una experiencia de usuario excepcional en:
 Todos los componentes se adaptan fluidamente y mantienen su funcionalidad y estética en cualquier tamaño de pantalla.
 
 
+

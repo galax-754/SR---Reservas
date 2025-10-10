@@ -174,3 +174,4 @@ Los usuarios en **Mobile/Tablet (< 950px)** siguen teniendo acceso solo a:
 Este cambio mejora la experiencia en desktop sin comprometer la usabilidad móvil. ✅
 
 
+

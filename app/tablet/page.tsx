@@ -44,3 +44,4 @@ export default function TabletPage() {
   return <TabletView assignedSpaceId={user.assignedSpaceId} />
 }
 
+

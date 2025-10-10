@@ -51,5 +51,18 @@
     "password": "$2b$10$KSO.VYfYcX4sbryv.7FI3O1fEwdUY0KcryLnlaqgdi10qP2FrlgdG",
     "temporaryPassword": false,
     "lastPasswordChange": "2025-01-09T00:00:00.000Z"
+  },
+  {
+    "nombre": "Alec Muza",
+    "correo": "alec.muza@capacit.io",
+    "organizacion": "Sofroma",
+    "rol": "Administrador",
+    "estado": "Activo",
+    "password": "$2b$10$c7oN5BGay/rlZ3YsXticrOonjdZWL5K00NHCut0lTFzp530Zf10W2",
+    "temporaryPassword": true,
+    "lastPasswordChange": "2025-10-08T22:16:52.091Z",
+    "id": "1759961739913",
+    "createdAt": "2025-10-08T22:15:39.913Z",
+    "updatedAt": "2025-10-08T22:16:52.091Z"
   }
 ]

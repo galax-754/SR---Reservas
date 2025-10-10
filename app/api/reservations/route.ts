@@ -1,6 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
-import { CreateReservationData } from '@/services/reservationsAPI';
+
+// Definir el tipo localmente para evitar problemas de importación
+interface CreateReservationData {
+  spaceId?: string;
+  userId?: string;
+  userName?: string;
+  userEmail?: string;
+  title?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  date?: string;
+  startTime?: string;
+  endTime?: string;
+  attendees?: number;
+  requirements?: string[];
+  coordinatorName?: string;
+  coordinatorEmail?: string;
+  coordinatorPhone?: string;
+  company?: string;
+  numberOfPeople?: number;
+  space?: any;
+  meetingType?: 'presencial' | 'hibrido';
+  coffeeBreak?: 'si' | 'no' | 'buscando';
+  cateringProvider?: any;
+  notes?: string;
+  status?: 'confirmed' | 'cancelled' | 'pending';
+}
 
 // GET /api/reservations - Obtener todas las reservas
 export async function GET(request: NextRequest) {
@@ -59,11 +86,11 @@ export async function GET(request: NextRequest) {
 // POST /api/reservations - Crear nueva reserva
 export async function POST(request: NextRequest) {
   try {
-    const reservationData: CreateReservationData = await request.json();
-    console.log('📝 Datos recibidos para crear reserva:', JSON.stringify(reservationData, null, 2));
+    const body = await request.json();
+    console.log('📝 Datos recibidos para crear reserva:', JSON.stringify(body, null, 2));
     
     // Validar que tenemos el email del coordinador
-    if (!reservationData.coordinatorEmail) {
+    if (!body.coordinatorEmail) {
       return NextResponse.json(
         { error: 'Email del coordinador es requerido' },
         { status: 400 }
@@ -74,7 +101,7 @@ export async function POST(request: NextRequest) {
     const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .select('id')
-      .eq('correo', reservationData.coordinatorEmail.toLowerCase())
+      .eq('correo', body.coordinatorEmail.toLowerCase())
       .single();
     
     if (userError || !user) {
@@ -86,63 +113,37 @@ export async function POST(request: NextRequest) {
     }
     
     // Validar datos requeridos
-    if (!reservationData.space?.id) {
+    if (!body.space?.id) {
       return NextResponse.json(
         { error: 'Espacio es requerido' },
         { status: 400 }
       );
     }
     
-    if (!reservationData.date || !reservationData.startTime || !reservationData.endTime) {
+    if (!body.date || !body.startTime || !body.endTime) {
       return NextResponse.json(
         { error: 'Fecha, hora de inicio y hora de fin son requeridos' },
         { status: 400 }
       );
     }
     
-    // Validar límite de horas de la organización (opcional)
-    if (reservationData.company) {
-      try {
-        const { data: organizacion } = await supabaseAdmin
-          .from('organizations')
-          .select('*')
-          .eq('name', reservationData.company)
-          .single();
-        
-        if (organizacion && organizacion.active) {
-          // Calcular duración de la reserva en horas
-          const startTime = reservationData.startTime.split(':');
-          const endTime = reservationData.endTime.split(':');
-          const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
-          const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
-          const durationHours = (endMinutes - startMinutes) / 60;
-          
-          // Nota: Por ahora no tenemos el campo de límite de horas en la tabla organizations
-          // Si necesitas esta funcionalidad, podemos agregar estos campos después
-        }
-      } catch (error) {
-        console.error('Error validando organización:', error);
-        // Continuar sin validación de límite de horas
-      }
-    }
-    
     // Crear fechas ISO para start_time y end_time
-    const startDateTime = `${reservationData.date}T${reservationData.startTime}:00.000Z`;
-    const endDateTime = `${reservationData.date}T${reservationData.endTime}:00.000Z`;
+    const startDateTime = `${body.date}T${body.startTime}:00.000Z`;
+    const endDateTime = `${body.date}T${body.endTime}:00.000Z`;
     
     // Crear la reserva en Supabase
     const { data: newReservation, error: createError } = await supabaseAdmin
       .from('reservations')
       .insert({
-        space_id: reservationData.space.id,
+        space_id: body.space.id,
         user_id: user.id,
-        title: reservationData.title,
-        description: reservationData.notes || '',
+        title: body.title || 'Reserva',
+        description: body.notes || '',
         start_time: startDateTime,
         end_time: endDateTime,
         status: 'confirmed',
-        attendees: reservationData.numberOfPeople || 1,
-        organization: reservationData.company || 'Unknown'
+        attendees: body.numberOfPeople || 1,
+        organization: body.company || 'Unknown'
       })
       .select()
       .single();

@@ -62,38 +62,67 @@ export async function POST(request: NextRequest) {
     const reservationData: CreateReservationData = await request.json();
     console.log('📝 Datos recibidos para crear reserva:', JSON.stringify(reservationData, null, 2));
     
+    // Validar que tenemos el email del coordinador
+    if (!reservationData.coordinatorEmail) {
+      return NextResponse.json(
+        { error: 'Email del coordinador es requerido' },
+        { status: 400 }
+      );
+    }
+    
     // Buscar el usuario por email del coordinador para obtener su ID
-    const { data: user } = await supabaseAdmin
+    const { data: user, error: userError } = await supabaseAdmin
       .from('users')
       .select('id')
-      .eq('correo', reservationData.coordinatorEmail)
+      .eq('correo', reservationData.coordinatorEmail.toLowerCase())
       .single();
     
-    if (!user) {
+    if (userError || !user) {
+      console.error('Error buscando usuario:', userError);
       return NextResponse.json(
         { error: 'Usuario no encontrado con ese email' },
         { status: 404 }
       );
     }
     
-    // Validar límite de horas de la organización
+    // Validar datos requeridos
+    if (!reservationData.space?.id) {
+      return NextResponse.json(
+        { error: 'Espacio es requerido' },
+        { status: 400 }
+      );
+    }
+    
+    if (!reservationData.date || !reservationData.startTime || !reservationData.endTime) {
+      return NextResponse.json(
+        { error: 'Fecha, hora de inicio y hora de fin son requeridos' },
+        { status: 400 }
+      );
+    }
+    
+    // Validar límite de horas de la organización (opcional)
     if (reservationData.company) {
-      const { data: organizacion } = await supabaseAdmin
-        .from('organizations')
-        .select('*')
-        .eq('name', reservationData.company)
-        .single();
-      
-      if (organizacion && organizacion.active) {
-        // Calcular duración de la reserva en horas
-        const startTime = reservationData.startTime.split(':');
-        const endTime = reservationData.endTime.split(':');
-        const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
-        const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
-        const durationHours = (endMinutes - startMinutes) / 60;
+      try {
+        const { data: organizacion } = await supabaseAdmin
+          .from('organizations')
+          .select('*')
+          .eq('name', reservationData.company)
+          .single();
         
-        // Nota: Por ahora no tenemos el campo de límite de horas en la tabla organizations
-        // Si necesitas esta funcionalidad, podemos agregar estos campos después
+        if (organizacion && organizacion.active) {
+          // Calcular duración de la reserva en horas
+          const startTime = reservationData.startTime.split(':');
+          const endTime = reservationData.endTime.split(':');
+          const startMinutes = parseInt(startTime[0]) * 60 + parseInt(startTime[1]);
+          const endMinutes = parseInt(endTime[0]) * 60 + parseInt(endTime[1]);
+          const durationHours = (endMinutes - startMinutes) / 60;
+          
+          // Nota: Por ahora no tenemos el campo de límite de horas en la tabla organizations
+          // Si necesitas esta funcionalidad, podemos agregar estos campos después
+        }
+      } catch (error) {
+        console.error('Error validando organización:', error);
+        // Continuar sin validación de límite de horas
       }
     }
     

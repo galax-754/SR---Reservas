@@ -92,6 +92,28 @@ export async function PUT(
       }
     }
     
+    // Obtener el usuario actual para validaciones
+    const { data: currentUser, error: getCurrentUserError } = await supabaseAdmin
+      .from('users')
+      .select('temporary_password')
+      .eq('id', params.id)
+      .single();
+
+    if (getCurrentUserError || !currentUser) {
+      return NextResponse.json(
+        { error: 'Usuario no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // Validar que no se pueda establecer estado "Activo" si tiene contraseña temporal
+    if (usuarioData.estado === 'Activo' && currentUser.temporary_password) {
+      return NextResponse.json(
+        { error: 'No se puede activar un usuario que tiene contraseña temporal. Debe cambiar su contraseña primero.' },
+        { status: 400 }
+      );
+    }
+
     // Preparar datos para actualización
     const updateData: any = {};
     if (usuarioData.nombre) updateData.nombre = usuarioData.nombre;

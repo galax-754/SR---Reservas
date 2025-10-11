@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
         rol: usuarioData.rol,
         password: hashedPassword,
         temporary_password: true,
-        estado: 'Activo',
+        estado: 'Pendiente', // Usuario pendiente hasta que cambie su contraseña temporal
         assigned_space_id: usuarioData.assignedSpaceId || null,
         last_password_change: new Date().toISOString()
       })

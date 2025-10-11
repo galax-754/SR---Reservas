@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
       .update({
         password: hashedPassword,
         temporary_password: false,
-        last_password_change: new Date().toISOString()
+        last_password_change: new Date().toISOString(),
+        estado: 'Activo' // Asegurar que el usuario esté activo después de cambiar la contraseña
       })
       .eq('id', userId)
       .select()

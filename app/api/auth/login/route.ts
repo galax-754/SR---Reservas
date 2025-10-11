@@ -36,10 +36,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que el usuario esté activo
+    // Verificar que el usuario esté activo Y que no tenga contraseña temporal
     if (usuario.estado !== 'Activo') {
       return NextResponse.json(
         { error: 'Tu cuenta no está activa. Contacta al administrador.' },
+        { status: 403 }
+      );
+    }
+
+    // Si el usuario tiene contraseña temporal, no puede estar realmente activo
+    if (usuario.temporary_password) {
+      return NextResponse.json(
+        { error: 'Debes cambiar tu contraseña temporal antes de acceder al sistema.' },
         { status: 403 }
       );
     }

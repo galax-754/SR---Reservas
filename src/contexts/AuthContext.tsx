@@ -84,10 +84,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         rol: mappedRole,
         assignedSpaceId: data.user.assignedSpaceId,
         organizacion: data.user.organizacion,
-        temporaryPassword: data.requirePasswordChange || data.user.temporaryPassword,
+        temporaryPassword: data.requirePasswordChange || data.user.temporary_password || false,
         estado: data.user.estado,
-        createdAt: data.user.createdAt,
-        updatedAt: data.user.updatedAt,
+        createdAt: data.user.created_at,
+        updatedAt: data.user.updated_at,
       }
 
       if (process.env.NODE_ENV === 'development') {

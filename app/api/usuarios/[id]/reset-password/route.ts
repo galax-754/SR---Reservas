@@ -54,6 +54,7 @@ export async function POST(
       .update({
         password: hashedPassword,
         temporary_password: true,
+        estado: 'Pendiente', // Usuario vuelve a estar pendiente hasta que cambie la contraseña
         last_password_change: new Date().toISOString()
       })
       .eq('id', userId)

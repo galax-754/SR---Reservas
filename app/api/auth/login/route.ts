@@ -36,23 +36,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verificar que el usuario esté activo Y que no tenga contraseña temporal
-    if (usuario.estado !== 'Activo') {
-      return NextResponse.json(
-        { error: 'Tu cuenta no está activa. Contacta al administrador.' },
-        { status: 403 }
-      );
-    }
-
-    // Si el usuario tiene contraseña temporal, no puede estar realmente activo
-    if (usuario.temporary_password) {
-      return NextResponse.json(
-        { error: 'Debes cambiar tu contraseña temporal antes de acceder al sistema.' },
-        { status: 403 }
-      );
-    }
-
-    // Verificar contraseña
+    // Verificar contraseña primero
     const isValidPassword = await authService.verifyPassword(password, usuario.password);
 
     if (!isValidPassword) {
@@ -60,6 +44,36 @@ export async function POST(request: NextRequest) {
         { error: 'Credenciales inválidas' },
         { status: 401 }
       );
+    }
+
+    // Si el usuario tiene contraseña temporal, permitir acceso y activarlo automáticamente
+    // Esto permite que usuarios pendientes inicien sesión con su contraseña temporal
+    if (usuario.temporary_password) {
+      // Si el usuario está pendiente o inactivo pero tiene contraseña temporal válida,
+      // activarlo automáticamente al iniciar sesión
+      if (usuario.estado !== 'Activo') {
+        const { error: updateError } = await supabaseAdmin
+          .from('users')
+          .update({ estado: 'Activo' })
+          .eq('id', usuario.id);
+
+        if (updateError) {
+          console.error('Error activando usuario:', updateError);
+          // Continuar con el login aunque falle la actualización
+        } else {
+          // Actualizar el objeto usuario con el nuevo estado
+          usuario.estado = 'Activo';
+          console.log(`✅ Usuario ${usuario.correo} activado automáticamente al iniciar sesión`);
+        }
+      }
+    } else {
+      // Si no tiene contraseña temporal, verificar que el usuario esté activo
+      if (usuario.estado !== 'Activo') {
+        return NextResponse.json(
+          { error: 'Tu cuenta no está activa. Contacta al administrador.' },
+          { status: 403 }
+        );
+      }
     }
 
     // No enviar el password en la respuesta y transformar campos

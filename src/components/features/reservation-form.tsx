@@ -618,7 +618,16 @@ export function ReservationForm({
     } catch (error: any) {
       console.error('Error al guardar reservación:', error);
       // Mostrar mensaje de error específico si viene del servidor
-      const errorMessage = error?.response?.data?.error || error?.message || 'Error al guardar la reservación';
+      let errorMessage = error?.message || error?.response?.data?.error || 'Error al guardar la reservación';
+      
+      // Si hay detalles adicionales, agregarlos
+      if (error?.response?.data?.details) {
+        errorMessage += `\n\nDetalles: ${error.response.data.details}`;
+      }
+      if (error?.response?.data?.suggestion) {
+        errorMessage += `\n\n${error.response.data.suggestion}`;
+      }
+      
       alert(errorMessage);
     } finally {
       setIsSubmitting(false);

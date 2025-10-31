@@ -97,8 +97,18 @@ class ReservationsAPI {
       });
       
       if (!response.ok) {
-        const errorData = await response.json();
-        const error: any = new Error(errorData.error || 'Error al actualizar reserva');
+        const errorData = await response.json().catch(() => ({ error: 'Error al actualizar reserva' }));
+        
+        // Construir mensaje de error más detallado
+        let errorMessage = errorData.error || 'Error al actualizar reserva';
+        if (errorData.details) {
+          errorMessage += `: ${errorData.details}`;
+        }
+        if (errorData.suggestion) {
+          errorMessage += `\n\nSugerencia: ${errorData.suggestion}`;
+        }
+        
+        const error: any = new Error(errorMessage);
         error.response = { data: errorData };
         throw error;
       }

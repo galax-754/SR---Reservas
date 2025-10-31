@@ -158,9 +158,31 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single();
     
     if (updateError) {
-      console.error('Error actualizando reserva:', updateError);
+      console.error('❌ Error actualizando reserva:', updateError);
+      console.error('❌ Detalles del error:', JSON.stringify(updateError, null, 2));
+      console.error('❌ Error completo:', updateError);
+      console.error('📝 Datos que se intentaron actualizar:', JSON.stringify(updateData, null, 2));
+      
+      // Extraer información del error de Supabase
+      const errorMessage = updateError.message || String(updateError) || 'Error actualizando reserva en la base de datos';
+      const errorCode = (updateError as any).code;
+      const errorDetails = (updateError as any).details || (updateError as any).hint || '';
+      
+      // Detectar si es un error de columna faltante
+      const isColumnError = errorMessage.toLowerCase().includes('column') || 
+                           errorMessage.toLowerCase().includes('does not exist') ||
+                           errorCode === '42703' || // PostgreSQL error code for undefined column
+                           errorDetails.toLowerCase().includes('column');
+      
       return NextResponse.json(
-        { error: 'Error actualizando reserva en la base de datos' },
+        { 
+          error: errorMessage,
+          details: errorDetails || errorCode || '',
+          code: errorCode,
+          suggestion: isColumnError 
+            ? 'Las columnas coordinator_name, coordinator_email o coordinator_phone no existen en la tabla. Por favor ejecuta el script UPDATE_RESERVATIONS_TABLE.sql en Supabase para agregar estas columnas.'
+            : undefined
+        },
         { status: 500 }
       );
     }

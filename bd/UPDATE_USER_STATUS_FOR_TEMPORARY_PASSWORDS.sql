@@ -34,3 +34,4 @@ FROM public.users
 WHERE temporary_password = false AND estado = 'Activo'
 ORDER BY created_at DESC;
 
+

@@ -377,6 +377,42 @@ export function ReservationForm({
   ): string[] => {
     const available: string[] = [];
     
+    // Obtener la hora actual para filtrar horarios pasados si la fecha es hoy
+    const now = new Date();
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const currentDate = getTodayLocalDate();
+    const isToday = formData.date === currentDate;
+    
+    // Si es hoy, la hora mínima permitida es la hora actual (redondeada al siguiente intervalo de 30 minutos)
+    let minTimeForToday = '';
+    if (isToday) {
+      const [currentHour, currentMinute] = currentTime.split(':').map(Number);
+      let nextHour = currentHour;
+      let nextMinute = 0;
+      
+      // Redondear hacia arriba al siguiente intervalo de 30 minutos
+      // Ejemplos:
+      // - 12:43 -> 13:00 (siguiente hora completa)
+      // - 12:15 -> 12:30 (siguiente media hora)
+      // - 12:00 -> 12:30 (siguiente media hora)
+      // - 12:30 -> 13:00 (siguiente hora completa)
+      
+      if (currentMinute === 0) {
+        // Si estamos en la hora exacta (ej: 12:00), permitir desde las 12:30
+        nextMinute = 30;
+      } else if (currentMinute <= 30) {
+        // Si estamos entre :01 y :30 (ej: 12:15), permitir desde las 12:30
+        nextMinute = 30;
+      } else {
+        // Si estamos entre :31 y :59 (ej: 12:43), permitir desde la siguiente hora completa (13:00)
+        nextHour += 1;
+        nextMinute = 0;
+      }
+      
+      minTimeForToday = `${String(nextHour).padStart(2, '0')}:${String(nextMinute).padStart(2, '0')}`;
+      console.log(`⏰ Fecha es hoy. Hora actual: ${currentTime}, Hora mínima permitida: ${minTimeForToday}`);
+    }
+    
     // Si hay tags del espacio, determinar el rango de horas permitido
     let minAllowedTime = '08:00';
     let maxAllowedTime = '20:00'; // Por defecto hasta las 20:00
@@ -395,6 +431,13 @@ export function ReservationForm({
       maxAllowedTime = latestEnd;
       
       console.log(`⏰ Rango de horarios permitido por tags: ${minAllowedTime} - ${maxAllowedTime}`);
+    }
+    
+    // Si es hoy, usar el máximo entre la hora actual y el mínimo permitido por tags
+    if (isToday && minTimeForToday) {
+      const minTimeForTodayMin = timeToMinutes(minTimeForToday);
+      const minAllowedMin = timeToMinutes(minAllowedTime);
+      minAllowedTime = minTimeForTodayMin > minAllowedMin ? minTimeForToday : minAllowedTime;
     }
 
     for (const timeSlot of allTimeSlots) {

@@ -113,9 +113,9 @@ export async function GET(request: NextRequest) {
         return {
           id: reservation.id,
           title: reservation.title || 'Reserva',
-          coordinatorName: userData.nombre || 'Usuario',
-          coordinatorEmail: userData.correo || '',
-          coordinatorPhone: '',
+          coordinatorName: reservation.coordinator_name || userData.nombre || 'Usuario',
+          coordinatorEmail: reservation.coordinator_email || userData.correo || '',
+          coordinatorPhone: reservation.coordinator_phone || '',
           company: reservation.organization || 'Sin organización',
           numberOfPeople: reservation.attendees || 1,
           space: {
@@ -181,10 +181,10 @@ export async function POST(request: NextRequest) {
       );
     }
     
-    // Buscar el usuario por email del coordinador para obtener su ID
+    // Buscar el usuario por email del coordinador para obtener su ID y nombre
     const { data: user, error: userError } = await supabaseAdmin
       .from('users')
-      .select('id')
+      .select('id, nombre')
       .eq('correo', body.coordinatorEmail.toLowerCase())
       .single();
     
@@ -228,7 +228,10 @@ export async function POST(request: NextRequest) {
         end_time: endDateTime,
         status: 'confirmed',
         attendees: body.numberOfPeople || 1,
-        organization: body.company || 'Unknown'
+        organization: body.company || 'Unknown',
+        coordinator_name: body.coordinatorName || user.nombre || '',
+        coordinator_email: body.coordinatorEmail || '',
+        coordinator_phone: body.coordinatorPhone || ''
       })
       .select()
       .single();

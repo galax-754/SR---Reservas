@@ -35,12 +35,30 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const startDate = new Date(reservation.start_time);
     const endDate = new Date(reservation.end_time);
     
+    // Buscar datos del usuario si existe
+    let coordinatorName = reservation.coordinator_name || 'Usuario';
+    let coordinatorEmail = reservation.coordinator_email || '';
+    let coordinatorPhone = reservation.coordinator_phone || '';
+    
+    if (reservation.user_id) {
+      const { data: userData } = await supabaseAdmin
+        .from('users')
+        .select('nombre, correo')
+        .eq('id', reservation.user_id)
+        .single();
+      
+      if (userData) {
+        coordinatorName = coordinatorName || userData.nombre || 'Usuario';
+        coordinatorEmail = coordinatorEmail || userData.correo || '';
+      }
+    }
+    
     const transformedReservation = {
       id: reservation.id,
       title: reservation.title || 'Reserva',
-      coordinatorName: 'Usuario',
-      coordinatorEmail: '',
-      coordinatorPhone: '',
+      coordinatorName: coordinatorName,
+      coordinatorEmail: coordinatorEmail,
+      coordinatorPhone: coordinatorPhone,
       company: reservation.organization || 'Sin organización',
       numberOfPeople: reservation.attendees || 1,
       space: {
@@ -117,6 +135,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (reservationData.status) updateData.status = reservationData.status;
     if (reservationData.numberOfPeople) updateData.attendees = reservationData.numberOfPeople;
     if (reservationData.company) updateData.organization = reservationData.company;
+    if (reservationData.coordinatorName !== undefined) updateData.coordinator_name = reservationData.coordinatorName;
+    if (reservationData.coordinatorEmail !== undefined) updateData.coordinator_email = reservationData.coordinatorEmail;
+    if (reservationData.coordinatorPhone !== undefined) updateData.coordinator_phone = reservationData.coordinatorPhone;
     
     // Si hay cambios en fecha/hora, actualizar start_time y end_time
     if (reservationData.date || reservationData.startTime || reservationData.endTime) {
@@ -146,6 +167,24 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     
     console.log('✅ Reserva actualizada en la base de datos:', JSON.stringify(updatedReservation, null, 2));
     
+    // Buscar datos del usuario si existe
+    let coordinatorName = updatedReservation.coordinator_name || 'Usuario';
+    let coordinatorEmail = updatedReservation.coordinator_email || '';
+    let coordinatorPhone = updatedReservation.coordinator_phone || '';
+    
+    if (updatedReservation.user_id) {
+      const { data: userData } = await supabaseAdmin
+        .from('users')
+        .select('nombre, correo')
+        .eq('id', updatedReservation.user_id)
+        .single();
+      
+      if (userData) {
+        coordinatorName = coordinatorName || userData.nombre || 'Usuario';
+        coordinatorEmail = coordinatorEmail || userData.correo || '';
+      }
+    }
+    
     // Transformar la respuesta al formato esperado por el frontend
     const startDate = new Date(updatedReservation.start_time);
     const endDate = new Date(updatedReservation.end_time);
@@ -153,9 +192,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const transformedReservation = {
       id: updatedReservation.id,
       title: updatedReservation.title || 'Reserva',
-      coordinatorName: 'Usuario',
-      coordinatorEmail: '',
-      coordinatorPhone: '',
+      coordinatorName: coordinatorName,
+      coordinatorEmail: coordinatorEmail,
+      coordinatorPhone: coordinatorPhone,
       company: updatedReservation.organization || 'Sin organización',
       numberOfPeople: updatedReservation.attendees || 1,
       space: {

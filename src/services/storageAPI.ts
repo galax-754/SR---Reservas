@@ -1,39 +1,30 @@
-import { supabase } from '@/lib/supabase/client';
-
 class StorageAPI {
-  private bucketName = 'space-img';
-
   /**
-   * Sube una imagen al storage de Supabase
+   * Sube una imagen al storage de Supabase usando la API del backend
    * @param file - Archivo de imagen a subir
    * @param folder - Carpeta donde guardar (opcional)
    * @returns URL pública de la imagen subida
    */
   async uploadImage(file: File, folder: string = 'spaces'): Promise<string> {
     try {
-      // Generar un nombre único para el archivo
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      // Crear FormData para enviar el archivo
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder);
 
-      // Subir el archivo a Supabase Storage
-      const { data, error } = await supabase.storage
-        .from(this.bucketName)
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      // Enviar el archivo a la API del backend
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
 
-      if (error) {
-        console.error('Error subiendo imagen:', error);
-        throw new Error(`Error al subir la imagen: ${error.message}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al subir la imagen');
       }
 
-      // Obtener la URL pública de la imagen
-      const { data: { publicUrl } } = supabase.storage
-        .from(this.bucketName)
-        .getPublicUrl(data.path);
-
-      return publicUrl;
+      const result = await response.json();
+      return result.url;
     } catch (error) {
       console.error('Error en uploadImage:', error);
       throw error;
@@ -41,27 +32,23 @@ class StorageAPI {
   }
 
   /**
-   * Elimina una imagen del storage
+   * Elimina una imagen del storage usando la API del backend
    * @param imageUrl - URL de la imagen a eliminar
    */
   async deleteImage(imageUrl: string): Promise<void> {
     try {
-      // Extraer el path de la URL
-      const urlParts = imageUrl.split(`${this.bucketName}/`);
-      if (urlParts.length < 2) {
+      if (!imageUrl || !imageUrl.includes('space-img/')) {
         console.warn('URL de imagen inválida:', imageUrl);
         return;
       }
 
-      const filePath = urlParts[1];
+      const response = await fetch(`/api/upload-image?url=${encodeURIComponent(imageUrl)}`, {
+        method: 'DELETE',
+      });
 
-      const { error } = await supabase.storage
-        .from(this.bucketName)
-        .remove([filePath]);
-
-      if (error) {
-        console.error('Error eliminando imagen:', error);
-        throw new Error(`Error al eliminar la imagen: ${error.message}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al eliminar la imagen');
       }
     } catch (error) {
       console.error('Error en deleteImage:', error);

@@ -266,7 +266,7 @@ export function LoginSection() {
             setUseImageFallback(true)
           }}
         >
-          <source src="/Video_fondo_escritorio.mp4" type="video/mp4" />
+          <source src="/Video_fondo_escritorio.mp4?v=2" type="video/mp4" />
         </video>
       )}
       
@@ -286,7 +286,7 @@ export function LoginSection() {
             setUseImageFallback(true)
           }}
         >
-          <source src="/Video_fondo_movil.mp4" type="video/mp4" />
+          <source src="/Video_fondo_movil.mp4?v=2" type="video/mp4" />
         </video>
       )}
 

@@ -120,7 +120,7 @@ export function HeroSection() {
           loop
           playsInline
         >
-          <source src="/Video_fondo_escritorio.mp4" type="video/mp4" />
+          <source src="/Video_fondo_escritorio.mp4?v=2" type="video/mp4" />
         </video>
         
         {/* Video para móvil - visible en pantallas menores a md */}
@@ -131,7 +131,7 @@ export function HeroSection() {
           loop
           playsInline
         >
-          <source src="/Video_fondo_movil.mp4" type="video/mp4" />
+          <source src="/Video_fondo_movil.mp4?v=2" type="video/mp4" />
         </video>
         
         <div className="absolute inset-0 bg-black/70" />

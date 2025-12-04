@@ -45,6 +45,7 @@ import { Reservation, ExternalVisitor } from "@/types/reservation"
 import { spacesAPI } from "@/services/spacesAPI"
 import { spaceTagsAPI } from "@/services/spaceTagsAPI"
 import { reservationsAPI } from "@/services/reservationsAPI"
+import { storageAPI } from "@/services/storageAPI"
 import { ReservationForm } from "./reservation-form"
 import { TabletReservationsView } from "./tablet-reservations-view"
 import { useUsuarios } from "@/hooks/useUserManagement"
@@ -1597,6 +1598,10 @@ export function DashboardSection() {
   ])
   const [newAmenity, setNewAmenity] = useState('')
   const [newSetupType, setNewSetupType] = useState('')
+  
+  // Estado para imagen de espacio
+  const [spaceImageFile, setSpaceImageFile] = useState<File | null>(null)
+  const [spaceImagePreview, setSpaceImagePreview] = useState<string>('')
 
   // Estados del formulario de tag
   const [newTag, setNewTag] = useState<CreateTagData>({
@@ -2098,6 +2103,9 @@ export function DashboardSection() {
       backgroundImage: '',
       description: ''
     })
+    // Limpiar estado de imagen
+    setSpaceImageFile(null)
+    setSpaceImagePreview('')
     setShowSpaceForm(true)
   }
 
@@ -2121,6 +2129,9 @@ export function DashboardSection() {
       backgroundImage: space.backgroundImage || '',
       description: space.description || ''
     })
+    // Limpiar estado de imagen nueva, pero mantener la imagen existente
+    setSpaceImageFile(null)
+    setSpaceImagePreview('')
     setShowSpaceForm(true)
   }
 
@@ -2146,19 +2157,42 @@ export function DashboardSection() {
   const handleSaveSpace = async () => {
     setIsLoading(true)
     try {
+      let imageUrl = newSpace.backgroundImage;
+      
+      // Si hay una nueva imagen seleccionada, subirla primero
+      if (spaceImageFile) {
+        try {
+          imageUrl = await storageAPI.uploadImage(spaceImageFile, 'spaces');
+        } catch (error) {
+          console.error('Error subiendo imagen:', error);
+          alert('Error al subir la imagen. El espacio se guardará sin imagen.');
+          imageUrl = '';
+        }
+      }
+      
+      // Crear objeto con los datos del espacio incluyendo la URL de la imagen
+      const spaceDataToSave = {
+        ...newSpace,
+        backgroundImage: imageUrl
+      };
+      
       if (editingSpaceId) {
         // Actualizar espacio existente
-        await spacesAPI.update(editingSpaceId, newSpace)
+        const response = await spacesAPI.update(editingSpaceId, spaceDataToSave)
         setSpaces(spaces.map(space => 
-          space.id === editingSpaceId ? { ...newSpace, id: editingSpaceId } : space
+          space.id === editingSpaceId ? response.data : space
         ))
         alert('Espacio actualizado correctamente')
       } else {
         // Crear nuevo espacio
-        const response = await spacesAPI.create(newSpace)
+        const response = await spacesAPI.create(spaceDataToSave)
         setSpaces([...spaces, response.data])
         alert('Espacio creado correctamente')
       }
+      
+      // Limpiar el estado de la imagen
+      setSpaceImageFile(null)
+      setSpaceImagePreview('')
       setShowSpaceForm(false)
       setEditingSpaceId(null)
     } catch (error: any) {
@@ -2308,9 +2342,9 @@ export function DashboardSection() {
     try {
       if (editingTagId) {
         // Actualizar tag existente
-        await spaceTagsAPI.update(editingTagId, newTag)
+        const response = await spaceTagsAPI.update(editingTagId, newTag)
         setTags(tags.map(tag => 
-          tag.id === editingTagId ? { ...newTag, id: editingTagId } : tag
+          tag.id === editingTagId ? response.data : tag
         ))
         alert('Tag actualizado correctamente')
       } else {
@@ -3955,18 +3989,50 @@ export function DashboardSection() {
 
             {/* Imagen de fondo */}
             <div>
-              <label className="block text-sm font-medium text-white mb-2">Imagen de fondo (URL)</label>
-              <div className="flex space-x-3">
+              <label className="block text-sm font-medium text-white mb-2">Imagen de fondo</label>
+              <div className="space-y-3">
                 <input
-                  type="text"
-                  className="flex-1 px-3 py-2 bg-white/10 border border-white/30 rounded-lg focus:ring-2 focus:ring-white/50 focus:border-white/60 text-white placeholder-white/60"
-                  value={newSpace.backgroundImage}
-                  onChange={(e) => setNewSpace(prev => ({ ...prev, backgroundImage: e.target.value }))}
-                  placeholder="https://ejemplo.com/imagen.jpg"
+                  type="file"
+                  accept="image/*"
+                  className="block w-full text-sm text-white
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-white/20 file:text-white
+                    hover:file:bg-white/30
+                    file:cursor-pointer cursor-pointer"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setSpaceImageFile(file);
+                      // Crear preview de la imagen
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setSpaceImagePreview(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
                 />
-                {newSpace.backgroundImage && (
-                  <div className="w-16 h-16 bg-cover bg-center rounded-lg border border-white/30" style={{ backgroundImage: `url(${newSpace.backgroundImage})` }} />
+                {(spaceImagePreview || newSpace.backgroundImage) && (
+                  <div className="relative w-full h-32 bg-cover bg-center rounded-lg border border-white/30" 
+                       style={{ backgroundImage: `url(${spaceImagePreview || newSpace.backgroundImage})` }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSpaceImageFile(null);
+                        setSpaceImagePreview('');
+                        setNewSpace(prev => ({ ...prev, backgroundImage: '' }));
+                      }}
+                      className="absolute top-2 right-2 p-1 bg-red-500 hover:bg-red-600 rounded-full"
+                    >
+                      <X className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
                 )}
+                <p className="text-xs text-white/60">
+                  Formatos aceptados: JPG, PNG, GIF. Tamaño máximo: 5MB
+                </p>
               </div>
             </div>
 

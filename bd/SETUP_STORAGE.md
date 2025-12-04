@@ -10,7 +10,7 @@ Para poder subir imágenes de los espacios directamente desde la aplicación, ne
 2. Ve a **Storage** en el menú lateral
 3. Haz clic en **"New bucket"** o **"Crear bucket"**
 4. Configura el bucket con los siguientes datos:
-   - **Name (Nombre):** `space-images`
+   - **Name (Nombre):** `space-img`
    - **Public bucket:** ✅ **Marca esta casilla** (para que las imágenes sean accesibles públicamente)
    - Haz clic en **"Create bucket"**
 
@@ -26,13 +26,13 @@ Ejecuta estos comandos en el **SQL Editor** de Supabase:
 -- Permitir que cualquiera pueda leer imágenes
 CREATE POLICY "Public Access"
 ON storage.objects FOR SELECT
-USING ( bucket_id = 'space-images' );
+USING ( bucket_id = 'space-img' );
 
 -- Permitir que usuarios autenticados puedan subir imágenes
 CREATE POLICY "Authenticated users can upload images"
 ON storage.objects FOR INSERT
 WITH CHECK (
-  bucket_id = 'space-images' 
+  bucket_id = 'space-img' 
   AND auth.role() = 'authenticated'
 );
 
@@ -40,7 +40,7 @@ WITH CHECK (
 CREATE POLICY "Authenticated users can update images"
 ON storage.objects FOR UPDATE
 USING ( 
-  bucket_id = 'space-images'
+  bucket_id = 'space-img'
   AND auth.role() = 'authenticated'
 );
 
@@ -48,7 +48,7 @@ USING (
 CREATE POLICY "Authenticated users can delete images"
 ON storage.objects FOR DELETE
 USING ( 
-  bucket_id = 'space-images'
+  bucket_id = 'space-img'
   AND auth.role() = 'authenticated'
 );
 ```
@@ -58,7 +58,7 @@ USING (
 Si prefieres deshabilitar RLS temporalmente para pruebas:
 
 1. Ve a **Storage** → **Policies**
-2. Selecciona el bucket `space-images`
+2. Selecciona el bucket `space-img`
 3. Desactiva **"Enable RLS"** (Row Level Security)
 
 ⚠️ **ADVERTENCIA:** Esta opción permite que cualquiera suba, vea y elimine archivos. Úsala solo en desarrollo.
@@ -82,7 +82,7 @@ Por defecto, Supabase permite archivos de hasta 50MB. Si quieres cambiar esto:
 CREATE POLICY "Limit file size"
 ON storage.objects FOR INSERT
 WITH CHECK (
-  bucket_id = 'space-images'
+  bucket_id = 'space-img'
   AND (storage.foldername(name))[1] = 'spaces'
   AND octet_length(decode(encode(content, 'base64'), 'base64')) < 5242880 -- 5MB en bytes
 );
@@ -92,7 +92,7 @@ WITH CHECK (
 
 Las imágenes se guardan con la siguiente estructura:
 ```
-space-images/
+space-img/
 └── spaces/
     ├── 1638360000000-abc123.jpg
     ├── 1638360001000-def456.png
@@ -107,7 +107,7 @@ Cada archivo tiene:
 ## Solución de Problemas
 
 ### Error: "Bucket not found"
-- Verifica que el bucket se llame exactamente `space-images`
+- Verifica que el bucket se llame exactamente `space-img`
 - Verifica que el bucket esté en tu proyecto correcto
 
 ### Error: "Permission denied"

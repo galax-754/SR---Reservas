@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase/client';
 
 class StorageAPI {
-  private bucketName = 'space-images';
+  private bucketName = 'space-img';
 
   /**
    * Sube una imagen al storage de Supabase

@@ -100,8 +100,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     
     if (updateError) {
       console.error('Error actualizando espacio:', updateError);
+      console.error('Detalles del error de Supabase:', JSON.stringify(updateError, null, 2));
       return NextResponse.json(
-        { error: 'Error actualizando espacio en la base de datos' },
+        { 
+          error: 'Error actualizando espacio en la base de datos',
+          details: updateError.message || String(updateError),
+          code: (updateError as any).code || undefined
+        },
         { status: 500 }
       );
     }
@@ -129,9 +134,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: transformedSpace });
   } catch (error) {
     console.error('Error actualizando espacio:', error);
-    
+    console.error('Detalles completos del error:', JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { 
+        error: 'Error interno del servidor',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

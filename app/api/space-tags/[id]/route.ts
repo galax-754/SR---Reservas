@@ -73,6 +73,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (tagData.name) updateData.name = tagData.name;
     if (tagData.color) updateData.color = tagData.color;
     if (tagData.description !== undefined) updateData.description = tagData.description;
+    if (tagData.allowedDays) updateData.allowed_days = tagData.allowedDays;
+    if (tagData.allowedHours?.start) updateData.start_time = tagData.allowedHours.start;
+    if (tagData.allowedHours?.end) updateData.end_time = tagData.allowedHours.end;
     
     const { data: updatedTag, error: updateError } = await supabaseAdmin
       .from('space_tags')
@@ -83,18 +86,42 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     
     if (updateError) {
       console.error('Error actualizando etiqueta:', updateError);
+      console.error('Detalles del error de Supabase:', JSON.stringify(updateError, null, 2));
       return NextResponse.json(
-        { error: 'Error actualizando etiqueta en la base de datos' },
+        { 
+          error: 'Error actualizando etiqueta en la base de datos',
+          details: updateError.message || String(updateError),
+          code: (updateError as any).code || undefined
+        },
         { status: 500 }
       );
     }
     
-    return NextResponse.json({ data: updatedTag });
+    // Transformar la respuesta al formato esperado por el frontend
+    const transformedTag = {
+      id: updatedTag.id,
+      name: updatedTag.name,
+      color: updatedTag.color || '#3B82F6',
+      allowedDays: updatedTag.allowed_days || ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
+      allowedHours: {
+        start: updatedTag.start_time || '08:00',
+        end: updatedTag.end_time || '18:00'
+      },
+      description: updatedTag.description || '',
+      createdAt: updatedTag.created_at,
+      updatedAt: updatedTag.updated_at
+    };
+    
+    return NextResponse.json({ data: transformedTag });
   } catch (error) {
     console.error('Error actualizando etiqueta:', error);
-    
+    console.error('Detalles completos del error:', JSON.stringify(error, null, 2));
     return NextResponse.json(
-      { error: 'Error interno del servidor' },
+      { 
+        error: 'Error interno del servidor',
+        details: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      },
       { status: 500 }
     );
   }

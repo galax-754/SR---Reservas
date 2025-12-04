@@ -43,12 +43,15 @@ class SpaceTagsAPI {
       });
       
       if (!response.ok) {
-        throw new Error('Error al crear etiqueta');
+        const errorData = await response.json();
+        const error: any = new Error(errorData.error || 'Error al crear etiqueta');
+        error.response = { data: errorData };
+        throw error;
       }
       
       const result = await response.json();
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en create:', error);
       throw error;
     }
@@ -65,12 +68,15 @@ class SpaceTagsAPI {
       });
       
       if (!response.ok) {
-        throw new Error('Error al actualizar etiqueta');
+        const errorData = await response.json();
+        const error: any = new Error(errorData.error || 'Error al actualizar etiqueta');
+        error.response = { data: errorData };
+        throw error;
       }
       
       const result = await response.json();
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error en update:', error);
       throw error;
     }

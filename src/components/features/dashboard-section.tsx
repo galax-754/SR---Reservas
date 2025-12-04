@@ -2161,9 +2161,20 @@ export function DashboardSection() {
       }
       setShowSpaceForm(false)
       setEditingSpaceId(null)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving space:', error)
-      alert('Error al guardar el espacio')
+      // Mostrar mensaje de error específico si viene del servidor
+      let errorMessage = error?.message || 'Error al guardar el espacio';
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      if (error?.response?.data?.details) {
+        errorMessage += `\n\nDetalles: ${error.response.data.details}`;
+      }
+      if (error?.response?.data?.code) {
+        errorMessage += `\n\nCódigo: ${error.response.data.code}`;
+      }
+      alert(errorMessage)
     } finally {
       setIsLoading(false)
     }
@@ -2272,9 +2283,13 @@ export function DashboardSection() {
           tags: space.tags.filter(tag => tag !== tagId)
         })))
         alert('Tag eliminado correctamente')
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error deleting tag:', error)
-        alert('Error al eliminar el tag')
+        let errorMessage = error?.message || 'Error al eliminar el tag';
+        if (error?.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        }
+        alert(errorMessage)
       }
     }
   }
@@ -2306,9 +2321,20 @@ export function DashboardSection() {
       }
       setShowTagForm(false)
       setEditingTagId(null)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving tag:', error)
-      alert('Error al guardar el tag')
+      // Mostrar mensaje de error específico si viene del servidor
+      let errorMessage = error?.message || 'Error al guardar el tag';
+      if (error?.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      }
+      if (error?.response?.data?.details) {
+        errorMessage += `\n\nDetalles: ${error.response.data.details}`;
+      }
+      if (error?.response?.data?.code) {
+        errorMessage += `\n\nCódigo: ${error.response.data.code}`;
+      }
+      alert(errorMessage)
     } finally {
       setIsLoading(false)
     }

@@ -119,11 +119,8 @@ export function HeroSection() {
           muted
           loop
           playsInline
-          ref={(el) => {
-            if (el) el.playbackRate = 0.75;
-          }}
         >
-          <source src="/Video_fondo_escritorio.mp4?v=2" type="video/mp4" />
+            <source src="/Video_fondo_escritorio.mp4?v=3" type="video/mp4" />
         </video>
         
         {/* Video para móvil - visible en pantallas menores a md */}
@@ -133,11 +130,8 @@ export function HeroSection() {
           muted
           loop
           playsInline
-          ref={(el) => {
-            if (el) el.playbackRate = 0.75;
-          }}
         >
-          <source src="/Video_fondo_movil.mp4?v=2" type="video/mp4" />
+            <source src="/Video_fondo_movil.mp4?v=3" type="video/mp4" />
         </video>
         
         <div className="absolute inset-0 bg-black/70" />

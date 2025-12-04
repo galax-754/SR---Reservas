@@ -31,6 +31,9 @@ export function LoginSection() {
     const video = isMobile ? videoRefMobile.current : videoRefDesktop.current
     
     if (!video) return
+    
+    // Establecer velocidad de reproducción en cámara lenta
+    video.playbackRate = 0.75
 
     // Función para activar fallback a imagen
     const activateImageFallback = () => {
@@ -253,7 +256,10 @@ export function LoginSection() {
       {/* Video de fondo - desktop (solo si no está en fallback) */}
       {!useImageFallback && (
         <video
-          ref={videoRefDesktop}
+          ref={(el) => {
+            videoRefDesktop.current = el;
+            if (el) el.playbackRate = 0.75;
+          }}
           className="hidden md:block absolute inset-0 w-full h-full object-cover"
           autoPlay
           muted
@@ -273,7 +279,10 @@ export function LoginSection() {
       {/* Video de fondo - mobile (solo si no está en fallback) */}
       {!useImageFallback && (
         <video
-          ref={videoRefMobile}
+          ref={(el) => {
+            videoRefMobile.current = el;
+            if (el) el.playbackRate = 0.75;
+          }}
           className="block md:hidden absolute inset-0 w-full h-full object-cover"
           autoPlay
           muted

@@ -119,6 +119,9 @@ export function HeroSection() {
           muted
           loop
           playsInline
+          ref={(el) => {
+            if (el) el.playbackRate = 0.75;
+          }}
         >
           <source src="/Video_fondo_escritorio.mp4?v=2" type="video/mp4" />
         </video>
@@ -130,6 +133,9 @@ export function HeroSection() {
           muted
           loop
           playsInline
+          ref={(el) => {
+            if (el) el.playbackRate = 0.75;
+          }}
         >
           <source src="/Video_fondo_movil.mp4?v=2" type="video/mp4" />
         </video>

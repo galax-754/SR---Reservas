@@ -4415,8 +4415,8 @@ export function DashboardSection() {
           <div className="p-3 sm:p-6 space-y-3 sm:space-y-6">
             {/* Imagen de fondo si existe */}
             {selectedSpace.backgroundImage && (
-              <div className="h-24 sm:h-40 md:h-48 bg-cover bg-center rounded-lg relative" style={{ backgroundImage: `url(${selectedSpace.backgroundImage})` }}>
-                <div className="absolute inset-0 bg-black/20 rounded-lg" />
+              <div className="h-48 sm:h-56 md:h-64 bg-contain bg-no-repeat bg-center rounded-lg relative border border-white/20" style={{ backgroundImage: `url(${selectedSpace.backgroundImage})` }}>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent rounded-lg pointer-events-none" />
               </div>
             )}
 

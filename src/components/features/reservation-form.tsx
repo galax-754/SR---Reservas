@@ -168,9 +168,12 @@ export function ReservationForm({
       if (space && space.tags && space.tags.length > 0) {
         const tags = allTags.filter(tag => space.tags.includes(tag.id));
         setSpaceTags(tags);
-        console.log('🏷️ Tags del espacio:', tags);
+        console.log('🏷️ Tags del espacio cargados:', tags.length, 'tags', tags);
+        console.log('🏷️ IDs de tags del espacio:', space.tags);
+        console.log('🏷️ Todos los tags disponibles:', allTags.length, 'tags');
       } else {
         setSpaceTags([]);
+        console.log('🏷️ El espacio no tiene tags asignados');
       }
     } else {
       setSelectedSpace(null);
@@ -185,7 +188,7 @@ export function ReservationForm({
     }
   }, [formData.space, formData.date]);
 
-  // Recalcular horas disponibles cuando cambie duración, espacio, fecha o reservas
+  // Recalcular horas disponibles cuando cambie duración, espacio, fecha, reservas o tags
   useEffect(() => {
     if (formData.duration && formData.space && formData.date) {
       const available = calculateAvailableTimeSlots(
@@ -201,7 +204,7 @@ export function ReservationForm({
     } else {
       setAvailableTimeSlots(allTimeSlots);
     }
-  }, [formData.duration, formData.space, formData.date, existingReservations]);
+  }, [formData.duration, formData.space, formData.date, existingReservations, spaceTags]);
 
   // Actualizar organización seleccionada cuando cambien las organizaciones o la company
   useEffect(() => {
@@ -414,11 +417,42 @@ export function ReservationForm({
     }
     
     // Si hay tags del espacio, determinar el rango de horas permitido
-    let minAllowedTime = '08:00';
-    let maxAllowedTime = '20:00'; // Por defecto hasta las 20:00
+    // Primero intentar usar los horarios disponibles del espacio si existen
+    let minAllowedTime = selectedSpace?.availableHours?.start || '08:00';
+    let maxAllowedTime = selectedSpace?.availableHours?.end || '20:00';
     
-    if (spaceTags.length > 0) {
-      // Encontrar el rango más amplio de todos los tags
+    if (spaceTags.length > 0 && formData.date) {
+      // Obtener el día de la semana de la fecha seleccionada
+      const date = new Date(formData.date + 'T00:00:00');
+      const dayOfWeek = date.getDay(); // 0 = domingo, 1 = lunes, etc.
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayName = dayNames[dayOfWeek];
+      
+      // Filtrar solo los tags que permiten este día específico
+      const applicableTags = spaceTags.filter(tag => tag.allowedDays.includes(dayName));
+      
+      if (applicableTags.length > 0) {
+        // Encontrar el rango más amplio de los tags aplicables para este día
+        const earliestStart = applicableTags.reduce((min, tag) => {
+          return tag.allowedHours.start < min ? tag.allowedHours.start : min;
+        }, '23:59');
+        
+        const latestEnd = applicableTags.reduce((max, tag) => {
+          return tag.allowedHours.end > max ? tag.allowedHours.end : max;
+        }, '00:00');
+        
+        minAllowedTime = earliestStart;
+        maxAllowedTime = latestEnd;
+        
+        console.log(`⏰ Fecha: ${formData.date} (${dayName}), Tags aplicables: ${applicableTags.length}, Rango permitido: ${minAllowedTime} - ${maxAllowedTime}`);
+      } else {
+        // Si ningún tag permite este día, no permitir ningún horario
+        minAllowedTime = '23:59';
+        maxAllowedTime = '00:00';
+        console.log(`⏰ Fecha: ${formData.date} (${dayName}), Ningún tag permite este día. No hay horarios disponibles.`);
+      }
+    } else if (spaceTags.length > 0) {
+      // Si hay tags pero no hay fecha seleccionada, usar el rango más amplio de todos los tags
       const earliestStart = spaceTags.reduce((min, tag) => {
         return tag.allowedHours.start < min ? tag.allowedHours.start : min;
       }, '23:59');
@@ -430,7 +464,7 @@ export function ReservationForm({
       minAllowedTime = earliestStart;
       maxAllowedTime = latestEnd;
       
-      console.log(`⏰ Rango de horarios permitido por tags: ${minAllowedTime} - ${maxAllowedTime}`);
+      console.log(`⏰ Sin fecha seleccionada, usando rango más amplio de tags: ${minAllowedTime} - ${maxAllowedTime}`);
     }
     
     // Si es hoy, usar el máximo entre la hora actual y el mínimo permitido por tags

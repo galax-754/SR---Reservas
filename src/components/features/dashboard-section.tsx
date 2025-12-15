@@ -2135,7 +2135,11 @@ export function DashboardSection() {
     setShowSpaceForm(true)
   }
 
-  const handleViewSpaceDetails = (space: Space, readOnly: boolean = false) => {
+  const handleViewSpaceDetails = async (space: Space, readOnly: boolean = false) => {
+    // Asegurar que los tags estén cargados antes de mostrar los detalles
+    if (tags.length === 0) {
+      await loadTags()
+    }
     setSelectedSpace(space)
     setSpaceDetailsReadOnly(readOnly)
     setShowSpaceDetails(true)

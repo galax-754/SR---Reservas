@@ -16,7 +16,7 @@ export function HeroSection() {
     offset: ["start start", "end start"],
   })
 
-  const imageScale = useTransform(scrollYProgress, [0, 1], [1.05, 0.95]) // Reduced hero image shrink from 15% to 5%
+  const imageScale = useTransform(scrollYProgress, [0, 1], [1.1, 1.0]) // Slightly zoomed to focus on top
   const imageY = useTransform(scrollYProgress, [0, 1], [0, -50])
   const contentY = useTransform(scrollYProgress, [0, 1], [0, 100])
   const contentOpacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
@@ -108,13 +108,13 @@ export function HeroSection() {
       <motion.div
         className="absolute inset-0"
         style={{ scale: imageScale, y: imageY }}
-        initial={{ scale: 1.05 }}
+        initial={{ scale: 1.1 }}
         animate={{ scale: 1 }}
         transition={{ duration: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
       >
         {/* Video para escritorio/iPad - visible en pantallas md y superiores */}
         <video
-          className="hidden md:block w-full h-full object-cover"
+          className="hidden md:block w-full h-full object-cover object-top"
           autoPlay
           muted
           loop
@@ -125,7 +125,7 @@ export function HeroSection() {
         
         {/* Video para móvil - visible en pantallas menores a md */}
         <video
-          className="block md:hidden w-full h-full object-cover"
+          className="block md:hidden w-full h-full object-cover object-top"
           autoPlay
           muted
           loop
@@ -139,15 +139,37 @@ export function HeroSection() {
 
       {/* Content */}
       <motion.div
-        className="relative z-10 h-full flex items-center justify-center px-4 sm:px-6 pt-16 md:pt-12 lg:pt-16"
+        className="relative z-10 h-full flex items-start justify-center px-4 sm:px-6 pt-4 sm:pt-6 md:pt-8 lg:pt-12"
         style={{ y: contentY, opacity: contentOpacity }}
       >
         <div className="max-w-7xl mx-auto text-center text-white w-full">
           <Reveal>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight md:leading-none tracking-tight mb-4 md:mb-6 px-2">
-              <span>Reserva un espacio para</span>
+            {/* Logo */}
+            <div className="flex justify-center mb-1 sm:mb-2 md:mb-3">
+              <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+              >
+                <Image
+                  src="/Logo_consolida.png"
+                  alt="Logo Consolida"
+                  width={200}
+                  height={200}
+                  className="w-auto h-32 sm:h-40 md:h-52 lg:h-64 xl:h-72 object-contain"
+                  priority
+                />
+              </motion.div>
+            </div>
+            {/* Título GRUPO CONSOLIDA */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight md:leading-none tracking-tight mb-2 sm:mb-3 md:mb-4 px-2 uppercase" style={{ fontFamily: "'Century Gothic', 'CenturyGothic', AppleGothic, sans-serif", color: '#e0e6f6' }}>
+              GRUPO CONSOLIDA
             </h1>
-            <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-light italic leading-tight md:leading-none tracking-tight mb-6 md:mb-8 px-2">
+            {/* Subtítulo Reserva un espacio para */}
+            <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-normal leading-tight md:leading-none tracking-tight mb-1 sm:mb-2 md:mb-3 px-2" style={{ fontFamily: "'Century Gothic', 'CenturyGothic', AppleGothic, sans-serif", color: '#e0e6f6' }}>
+              <span>Reserva un espacio para</span>
+            </h2>
+            <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light italic leading-tight md:leading-none tracking-tight mb-2 sm:mb-3 md:mb-4 px-2" style={{ color: '#e0e6f6' }}>
               <span className="inline-block">
                 {displayedText}
                 <motion.span
@@ -158,21 +180,23 @@ export function HeroSection() {
                   |
                 </motion.span>
               </span>
-            </h2>
+            </h3>
             
             {/* Botón de Iniciar Sesión */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 1.5 }}
+              className="mt-6 sm:mt-8 md:mt-10 lg:mt-12"
             >
               <motion.button
                 onClick={handleLoginClick}
-                className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-white text-gray-900 rounded-full font-semibold text-base sm:text-lg hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl touch-manipulation"
-                whileHover={{ scale: 1.05 }}
+                className="inline-flex items-center gap-2 px-6 py-3 sm:px-8 sm:py-4 bg-transparent border-2 rounded-full font-semibold text-base sm:text-lg transition-all duration-300 shadow-lg hover:shadow-xl touch-manipulation"
+                style={{ borderColor: '#e0e6f6', color: '#e0e6f6' }}
+                whileHover={{ scale: 1.05, backgroundColor: 'rgba(224, 230, 246, 0.1)' }}
                 whileTap={{ scale: 0.95 }}
               >
-                <LogIn className="w-4 h-4 sm:w-5 sm:h-5" />
+                <LogIn className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: '#e0e6f6' }} />
                 Iniciar Sesión
               </motion.button>
             </motion.div>
@@ -182,9 +206,9 @@ export function HeroSection() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 2 }}
-              className="mt-3 sm:mt-4 text-center"
+              className="mt-4 sm:mt-5 md:mt-6 lg:mt-8 text-center"
             >
-              <p className="text-white/70 text-xs sm:text-sm">
+              <p className="text-xs sm:text-sm" style={{ color: '#e0e6f6', opacity: 0.8 }}>
                 Accede al sistema de reservas
               </p>
             </motion.div>
@@ -201,17 +225,17 @@ export function HeroSection() {
         transition={{ duration: 0.8, delay: 1.2, ease: [0.21, 0.47, 0.32, 0.98] }}
       >
         <BlurPanel className="mx-2 sm:mx-6 mb-4 sm:mb-6 px-3 sm:px-6 py-3 sm:py-4 bg-black/24 backdrop-blur-md border-white/20 w-full sm:w-auto">
-          <div className="flex items-center justify-center sm:justify-between gap-3 sm:gap-6 text-white/90 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center justify-center sm:justify-between gap-3 sm:gap-6 flex-wrap sm:flex-nowrap" style={{ color: '#e0e6f6' }}>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+              <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" style={{ color: '#e0e6f6' }} />
               <span className="text-xs sm:text-sm whitespace-nowrap">Elige tu espacio</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+              <User className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" style={{ color: '#e0e6f6' }} />
               <span className="text-xs sm:text-sm whitespace-nowrap">Llena tus datos</span>
             </div>
             <div className="flex items-center gap-1.5 sm:gap-2">
-              <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white flex-shrink-0" />
+              <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0" style={{ color: '#e0e6f6' }} />
               <span className="text-xs sm:text-sm whitespace-nowrap">Listo</span>
             </div>
           </div>

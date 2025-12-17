@@ -36,3 +36,4 @@ WHERE tablename = 'objects'
 AND schemaname = 'storage'
 AND policyname LIKE '%space-img%' OR policyname LIKE '%Lectura%';
 
+
